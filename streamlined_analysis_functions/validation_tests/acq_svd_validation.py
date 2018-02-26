@@ -25,4 +25,4 @@ plot(acq_det_obj(this_event)[0][1]-mean(acq_det_obj(this_event)[0][1][:300]))
 plot(dot(my_dict[acqiris_alias+'/'+channel_number+'/weightings'][my_index], eig_bas),'r.')
 #plot(dot(my_dict[acqiris_alias+'/'+channel_number+'/weightings'][my_index-1], eig_bas),'r.')
 #plot(dot(my_dict[acqiris_alias+'/'+channel_number+'/weightings'][my_index+1], eig_bas),'r.')
-
+show()
