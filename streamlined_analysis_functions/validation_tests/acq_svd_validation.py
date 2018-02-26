@@ -1,4 +1,4 @@
-%matplotlib
+#%matplotlib
 acqiris_alias="ACQ1"
 eigen_basis_file = "eigen_traces.h5"
 experiment_name = "amoe7615"
