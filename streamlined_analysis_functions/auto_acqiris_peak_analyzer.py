@@ -4,8 +4,6 @@ import IPython
 from scipy.optimize import curve_fit
 from scipy.signal import savgol_filter
 
-
-
 def peakFunction(x,a,x0,offset):
 	return a*(x-x0)**2+offset
 

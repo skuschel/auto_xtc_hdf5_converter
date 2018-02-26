@@ -10,7 +10,7 @@ from scipy.signal import savgol_filter
 ######################################################
 
 try:
-	eigen_traces_h5py=h5py.File("eigen_traces_run192.h5")
+	eigen_traces_h5py=h5py.File("eigen_traces.h5")
 	#eigen_traces = f['summary/nonMeaningfulCoreNumber0/Acq01/ch1/eigen_wave_forms']
 except:
 	print("eigen_traces_run192.h5")
@@ -119,36 +119,3 @@ def make_acq_svd_basis(detectorObject,thisEvent,previousProcessing):
 ######################################################
 #######End of eigen basis generation##################
 ######################################################
-
-def generic_acqiris_analyzer(detectorObject,thisEvent):
-	selfName = detectorObject['self_name']
-	fit_results = {}
-
-	if(None is detectorObject[selfName](thisEvent)):
-		#fit_results = {'amplitude':popt[2],'uncertainty_cov':pcov[2,2]}
-		return None
-		
-	x = detectorObject[selfName](thisEvent)[1][0]
-	for i in arange(len(detectorObject[selfName](thisEvent)[0])):
-
-		y = detectorObject[selfName](thisEvent)[0][i]
-
-
-		smoothed_wave = convolve(y,[1,1,1,1,1,1],mode='same')
-		initial_peak = argmax(smoothed_wave)	#how to hardcode
-		initial_height = smoothed_wave[initial_peak]
-		peak_width = 4	############################## tunable parameter
-
-		y_small = y[initial_peak-peak_width:initial_peak+peak_width] - mean(y[:])
-		x_small = x[initial_peak-peak_width:initial_peak+peak_width]
-
-		#IPython.embed()
-		try:
-			popt,pcov = curve_fit(peakFunction,x_small,y_small,p0=[0.0,initial_peak,initial_height])
-		
-			fit_results['ch'+str(i)] = {"position":popt[1],'amplitude':popt[2],'position_var':pcov[1,1],'amplitude_var':pcov[2,2]}
-
-		except (RuntimeError,TypeError) as e:
-			fit_results = None
-
-	return fit_results

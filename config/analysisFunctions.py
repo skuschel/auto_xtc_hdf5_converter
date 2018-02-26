@@ -3,55 +3,127 @@ import psana
 import IPython
 from scipy.optimize import curve_fit
 from scipy.signal import savgol_filter
+import h5py
+
+######################################################
+#######Using the eigen traces#########################
+######################################################
+
+try:
+	eigen_traces_h5py=h5py.File("eigen_traces.h5")
+	#eigen_traces = f['summary/nonMeaningfulCoreNumber0/Acq01/ch1/eigen_wave_forms']
+except:
+	print("eigen_traces.h5 not found")
+	pass
+
+
+def use_acq_svd_basis(detectorObject, thisEvent):
+	selfName = detectorObject['self_name']
+	my_results = {}
+	config_parameters = {"thresh_hold":0.05,"waveform_mask":arange(1200,1230),"eigen_basis_size":25,"offset_mask":arange(300)}
+
+	if(None is detectorObject[selfName](thisEvent)):
+		#fit_results = {'amplitude':popt[2],'uncertainty_cov':pcov[2,2]}
+		return None
+		
+	#x = detectorObject[selfName](thisEvent)[1][0]
+	for i in arange(len(detectorObject[selfName](thisEvent)[0])):
+		eigen_traces = eigen_traces_h5py["summary/nonMeaningfulCoreNumber0/"+selfName+"/ch"+str(i)+"/norm_eigen_wave_forms"]
+		#eigen_traces = eigen_traces_h5py["summary/nonMeaningfulCoreNumber0/"+selfName+"/ch"+str(i)+"/eigen_wave_forms"]
+		#eigen_traces = array([eigen_traces[j]/sum(eigen_traces[j]**2)**0.5 for j in arange(len(eigen_traces))])	#not efficient. constantly renormalizing. will optimize later
+		#IPython.embed()
+		y = detectorObject[selfName](thisEvent)[0][i]
+		y -= mean(y[config_parameters['offset_mask']])
+		weightings = dot(eigen_traces,y)
+		residuals = y-dot(weightings,eigen_traces)
+		variance = dot(eigen_traces,residuals)**2
+		#approximation in line above comes from eigen_traces is orthogonal matrix, 
+		#so dot (eigen_traces.transpose(),eigen_traces) is diagonal. 
+		#missing something with number of points and degrees of freedom
+		my_results["ch"+str(i)] = {"weightings":weightings,"variance":variance}
+
+	return my_results
+
+######################################################
+#######Creating the acqiris eigen basis###############
+######################################################
+def svd_update(eigen_system,new_vector,config_parameters):
+	
+	try:
+		reconstructed_system = dot(eigen_system['eigen_weightings'], eigen_system['eigen_wave_forms'])
+		reconstructed_system = vstack([reconstructed_system,new_vector])
+
+		
+		singular_values,svd_lsv = eig(dot(reconstructed_system,reconstructed_system.transpose()))
+		
+		new_weightings = dot(svd_lsv,diag(singular_values))
+		new_eigen_vectors = dot(pinv(new_weightings),reconstructed_system)[:config_parameters["eigen_basis_size"]]
+
+		norm_eigen_vectors = real(array([new_eigen_vectors[i]/sum(new_eigen_vectors[i]**2)**0.5 for i in arange(len(new_eigen_vectors))]))
+
+		eigen_system = {'eigen_weightings':new_weightings,'eigen_wave_forms':new_eigen_vectors,'norm_eigen_wave_forms':norm_eigen_vectors}
+	
+	except TypeError:
+		if ((None is new_vector) and (len(eigen_system['eigen_weightings'])>1)):
+			pass
+		else:
+			eigen_system['eigen_weightings'] = [1]
+			eigen_system['eigen_wave_forms'] = new_vector
+			eigen_system['norm_eigen_wave_forms'] = new_vector
+
+	except ValueError:
+		
+		if (1==len(eigen_system['eigen_weightings'])):
+			eigen_system['eigen_weightings'] = array([[1,0],[0,1]])
+			eigen_system['eigen_wave_forms'] = vstack([eigen_system['eigen_wave_forms'],new_vector])
+			eigen_system['norm_eigen_wave_forms'] = eigen_system['eigen_wave_forms']		
+
+	return eigen_system
+
+def make_acq_svd_basis(detectorObject,thisEvent,previousProcessing):
+	selfName = detectorObject['self_name']
+	config_parameters = {"thresh_hold":0.05,"waveform_mask":arange(1200,1230),"eigen_basis_size":25,"offset_mask":arange(300)}
+
+	eigen_system = {}
+	
+	##############################
+	#### initializing arrays #####
+	##############################
+	if None is detectorObject[selfName](thisEvent):
+		return None
+
+	for i in arange(len(detectorObject[selfName](thisEvent)[0])):
+
+		try:
+			eigen_system["ch"+str(i)] = previousProcessing["ch"+str(i)]
+		except (KeyError,TypeError) as e:
+			try:
+				y =  detectorObject[selfName](thisEvent)[0][i]			
+				y -= mean(y[config_parameters['offset_mask']])			
+				eigen_system["ch"+str(i)]= {'eigen_wave_forms':y,'eigen_weightings':[1],'norm_eigen_wave_forms':[1]}
+			except (KeyError,TypeError) as e:
+				eigen_system["ch"+str(i)] = {'eigen_wave_forms':None,'eigen_weightings':None,'norm_eigen_wave_forms':None}
+
+	##############################
+	###main part of calculation###
+	##############################
+	new_eigen_system = {}
+	for i in arange(len(detectorObject[selfName](thisEvent)[0])):
+
+		
+		new_eigen_system["ch"+str(i)] = svd_update(eigen_system["ch"+str(i)],detectorObject[selfName](thisEvent)[0][i],config_parameters)
+		
+
+	return new_eigen_system
+
+######################################################
+#######End of eigen basis generation##################
+######################################################
 
 def genericReturn(detectorObject,thisEvent):
 	selfName = detectorObject['self_name']
 	return detectorObject[selfName](thisEvent)
 
-svd_size = 16
-eigen_background = {}
-#for i in [60,63,72,71,79,81,82]:
-#	eigen_background[str(i)] = loadtxt("eigen_backgrounds/eigen_background_run"+str(i)+".dat")
-try:
-	eigen_background["60"] = loadtxt("eigen_backgrounds/eigen_background_run60.dat")
-	eigen_background["63"] = loadtxt("eigen_backgrounds/eigen_background_run63.dat")
-	eigen_background["71"] = loadtxt("eigen_backgrounds/eigen_background_run71.dat")
-	eigen_background["72"] = loadtxt("eigen_backgrounds/eigen_background_run72.dat")
-	eigen_background["79"] = loadtxt("eigen_backgrounds/eigen_background_run79.dat")
-	eigen_background["81"] = loadtxt("eigen_backgrounds/eigen_background_run81.dat")
-	eigen_background["82"] = loadtxt("eigen_backgrounds/eigen_background_run82.dat")
-except: pass
-
-
-def peakFunction(x,a,x0,offset):
-	return a*(x-x0)**2+offset
-
-def svd_atm_analysis(detectorObject,thisEvent):
-	v = eigen_background[str(thisEvent.run())]
-	#IPython.embed()
-	myImage = detectorObject['timeToolOpal'].raw(thisEvent)
-	if None == myImage:
-		myDict = {"time_pixel":-999.0,"uncertainty_cov":-999.0}
-		return myDict
-	else:
-		my_projection = sum(myImage[370:],axis=0)
-		background_subtracted = my_projection - dot(dot(my_projection,v[:svd_size].transpose()),v[:svd_size])
-
-		#initial guess. win_c = window cneter. 25 is empirical drop width
-		filtered_signal = savgol_filter(background_subtracted,25,2,1)
-		win_c = argmin(filtered_signal)
-		initial_guess = [1,win_c,filtered_signal[win_c]]
-		try:
-			popt,pcov = curve_fit(peakFunction,arange(win_c-4,win_c+5),filtered_signal[win_c-4:win_c+5], p0=initial_guess)
-		
-		
-			myDict = {'time_pixel':popt[1],'uncertainty_cov':pcov[1,1]}
-		except (RuntimeError,ValueError):
-			myDict = {'time_pixel':-999,'uncertainty_cov':-999}
-
-		#IPython.embed()
-
-		return myDict
 
 def get_projection(detectorObject,thisEvent):
 	#IPython.embed()
@@ -86,43 +158,6 @@ def getTimeToolData(detectorObject,thisEvent):
 		myDict['positionFWHM'] = ttData.position_fwhm()
 
 	return myDict
-
-def generic_acqiris_analyzer(detectorObject,thisEvent):
-	selfName = detectorObject['self_name']
-	fit_results = {}
-
-	if(None is detectorObject[selfName](thisEvent)):
-		#fit_results = {'amplitude':popt[2],'uncertainty_cov':pcov[2,2]}
-		return None
-		
-	x = detectorObject[selfName](thisEvent)[1][0]
-	for i in arange(len(detectorObject[selfName](thisEvent)[0])):
-
-		y = detectorObject[selfName](thisEvent)[0][i]
-
-		initial_peak = argmax(convolve(abs(y),[1,1,1,1,1,1]),mode='same')
-	
-		
-
-		#myFit = polyfit(x, myWaveForm[7500:10000],3)
-		#p = poly1d(myFit)
-		#myMax = max(p(x))
-		#return myMax	
-
-		y_small = y[initial_peak-10:initial_peak+10]
-		x_small = x[initial_peak-10:initial_peak+10]
-
-		#IPython.embed()
-		try:
-			popt,pcov = curve_fit(peakFunction,x_small,y_small,p0=[0.0,initial_peak,y[initial_peak]])
-		
-			fit_results['ch'+str(i)] = {"position":popt[1],'amplitude':popt[2],'position_var':pcov[1,1],'amplitude_var':pcov[2,2]}
-
-		except RuntimeError:
-			fit_results = None}
-
-
-	return fit_results
 
 def getPeak(detectorObject,thisEvent):
 	selfName = detectorObject['self_name']

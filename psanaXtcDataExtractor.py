@@ -86,7 +86,7 @@ def generateDetectorDictionary(configFileName):
 	print("working directory = "+str(myWorkingDirectory))
 
 	print("reading config file")
-	f = open(myWorkingDirectory+"/config/"+configFileName,'r')
+	f = open(myWorkingDirectory+"/"+configFileName,'r')
 	myDetectorObjectDictionary = {}
 	myDetectorObjectDictionary['analyzer'] = {}
 	myDetectorObjectDictionary['summarizer'] = {}				

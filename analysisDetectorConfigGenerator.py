@@ -5,6 +5,7 @@ import os
 sys.path.append(os.curdir) 
 import argparse
 import psana
+import IPython
 
 #--------------------------------------------------------------------------
 # File and Version Information:
@@ -22,7 +23,48 @@ import psana
 #
 #==================
 #to do: figure out why touching __init__.py doesn't create file.  Solved.  White space before __init__.py
+def write_config_file(configFileName,config_type):
 
+	f = open('./config/'+configFileName,'w')
+	print("writing libraries")
+
+	f.write('##########################\n')
+	f.write('#######DAQ DEVICES########\n')
+	f.write('##########################\n')
+
+	for thisDetectorName in psana.DetNames():
+		is_acqiris = (True in ['Acqiris' in i for i in  thisDetectorName])
+		#IPython.embed()
+
+		f.write('#')
+		det_desc = []
+		for i in thisDetectorName:
+			f.write(str(i)+',')
+			det_desc.append(i)
+			
+			#f.write(' detectorFinish')
+
+		if(is_acqiris):
+			if("make_acq_basis"==config_type):
+					f.write(det_desc[-2]+',None,make_acq_svd_basis,\n')
+
+			elif("use_acq_basis"==config_type):
+					f.write(det_desc[-2]+',use_acq_svd_basis,None,\n')
+			else:
+				f.write('\n')
+		else:
+			f.write('\n')
+	f.write('##########################\n')
+	f.write('#######EPICS PVs##########\n')
+	f.write('##########################\n')
+
+	for thisDetectorName in psana.DetNames('epics'):
+		f.write('#')
+		for i in thisDetectorName:
+			f.write(str(i)+', ')
+		#f.write(' epicsPvFinish')
+		f.write('\n')
+	f.close()
 
 
 def main(exp, run, configFileName):
@@ -35,31 +77,11 @@ def main(exp, run, configFileName):
 
 	print("initializing")
 	myDataSource = psana.MPIDataSource(experimentNameAndRun)
-	f = open('./config/'+configFileName,'w')
-	print("writing libraries")
 
-	f.write('##########################\n')
-	f.write('#######DAQ DEVICES########\n')
-	f.write('##########################\n')
-
-	for thisDetectorName in psana.DetNames():
-		#f.write('#detectorStart, ')
-		f.write('#')
-		for i in thisDetectorName:
-			f.write(str(i)+', ')
-		#f.write(' detectorFinish')
-		f.write('\n')
-	f.write('##########################\n')
-	f.write('#######EPICS PVs##########\n')
-	f.write('##########################\n')
-
-	for thisDetectorName in psana.DetNames('epics'):
-		f.write('#')
-		for i in thisDetectorName:
-			f.write(str(i)+', ')
-		#f.write(' epicsPvFinish')
-		f.write('\n')
-	f.close()
+	write_config_file(configFileName,"default")
+	write_config_file("make_acq_eigen_basis.cfg","make_acq_basis")
+	write_config_file("acqiris_eigen_analysis.cfg","use_acq_basis")
+	
 	os.system("cp /reg/g/psdm/sw/hutch/sxd/auto_xtc_hdf5_converter/config/analysisFunctions.py ./config/")
 	
 
