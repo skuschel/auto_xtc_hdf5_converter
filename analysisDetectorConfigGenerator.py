@@ -82,7 +82,7 @@ def main(exp, run, configFileName):
 	write_config_file("make_acq_eigen_basis.cfg","make_acq_basis")
 	write_config_file("acqiris_eigen_analysis.cfg","use_acq_basis")
 	
-	os.system("cp /reg/g/psdm/sw/hutch/sxd/auto_xtc_hdf5_converter/config/analysisFunctions.py ./config/")
+	#os.system("cp /reg/g/psdm/sw/hutch/sxd/auto_xtc_hdf5_converter/config/analysisFunctions.py ./config/")
 	
 
 if __name__ == '__main__':
