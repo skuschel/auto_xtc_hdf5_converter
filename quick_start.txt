@@ -1,0 +1,15 @@
+git clone https://github.com/sioan/auto_xtc_hdf5_converter.git
+cd auto_xtc_hdf5_converter/
+./analysisDetectorConfigGenerator.py -e amoe7615 -r 201 -c analysis.cfg
+vi config/make_acq_eigen_basis.cfg 
+#get rid of pound "#" on acqiris's
+psanaXtcDataExtractor.py -e amoe7615 -r 201 -c config/make_acq_eigen_basis.cfg -f 3000
+interactiveExtractionValidator.sh amoe7615run201.h5 
+mv amoe7615run201.h5 eigen_traces.h5 	#this step is important cause eigen_traces.h5 is hard coded in analysis functions
+vi config/acqiris_eigen_analysis.cfg 
+psanaXtcDataExtractor.py -e amoe7615 -r 201 -c config/acqiris_eigen_analysis.cfg -t
+interactiveExtractionValidator.sh amoe7615run201.h5 
+
+#then inside the ipython session start
+execfile("streamlined_analysis_functions/validation_tests/acq_svd_validation.py")
+
