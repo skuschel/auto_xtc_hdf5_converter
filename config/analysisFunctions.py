@@ -262,3 +262,15 @@ def slowCameraImageSummarizer(detectorObject,thisEvent,previousProcessing):
 		previousProcessing.update(myDict)
 	
 	return previousProcessing
+
+def getDLS(detectorObject, thisEvent):
+        selfName = detectorObject['self_name']
+
+        # IPython.embed()
+
+        if detectorObject[selfName].values(thisEvent) is None:
+                myDictionary = {'DLS_PS': -999.0}
+                return myDictionary
+
+        DLS_PS = detectorObject[selfName].values(thisEvent)[0]
+        return {'DLS_PS': DLS_PS}
