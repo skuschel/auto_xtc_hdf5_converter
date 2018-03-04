@@ -272,7 +272,7 @@ if __name__ == '__main__':
 		
 	myParser.add_argument('-e','--exp', help='the experiment name')
 	myParser.add_argument('-r','--run',type=int,help='the run number to use when running offline')
-	myParser.add_argument('-c','--configFile',help='the config file to read from',default='analysis.cfg')
+	myParser.add_argument('-c','--configFile',help='the config file to read from',default='config/analysis.cfg')
 	myParser.add_argument('-hd5','--hd5File',help='extension of the small data file to write to. typically a,b or c',default="")
 	myParser.add_argument('-t','--testSample',action='store_true',help='only take a small set of data for testing')
 	myParser.add_argument('-td','--ttDevice',type=str,help='device to use for getting time tool ', default=None)

@@ -36,7 +36,8 @@ def use_acq_svd_basis(detectorObject, thisEvent):
 		y -= mean(y[config_parameters['offset_mask']])
 		weightings = dot(eigen_traces,y)
 		residuals = y-dot(weightings,eigen_traces)
-		variance = dot(eigen_traces,residuals)**2
+		variance = sum(residuals**2)/len(y)
+		#variance = dot(eigen_traces,residuals)**2
 		#approximation in line above comes from eigen_traces is orthogonal matrix, 
 		#so dot (eigen_traces.transpose(),eigen_traces) is diagonal. 
 		#missing something with number of points and degrees of freedom
@@ -239,5 +240,25 @@ def getEBeam(detectorObject,thisEvent):
 	else:
 		return 0
 
+#for slow cameras that would crash psana if written every event cause of back filling with zeros
+def slowCameraImageSummarizer(detectorObject,thisEvent,previousProcessing):
+	
+	#return detectorObject.image(thisEvent)
+	tempImage = detectorObject.image(thisEvent)
+	myDict= {}
 
+	try:
+		if(type(previousProcessing) != dict):
+			previousProcessing = {}
+	except NameError:
+		previousProcessing = {}
 
+	if(tempImage is not None):
+		print("got image")
+		myEventId = thisEvent.get(psana.EventId)
+		myTime = myEventId.time()[0]
+		myDict["sec"+str(myTime)] = tempImage		
+		
+		previousProcessing.update(myDict)
+	
+	return previousProcessing
