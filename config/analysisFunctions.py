@@ -242,9 +242,10 @@ def getEBeam(detectorObject,thisEvent):
 
 #for slow cameras that would crash psana if written every event cause of back filling with zeros
 def slowCameraImageSummarizer(detectorObject,thisEvent,previousProcessing):
-	
+		
+	selfName = detectorObject['self_name']
 	#return detectorObject.image(thisEvent)
-	tempImage = detectorObject.image(thisEvent)
+	tempImage = detectorObjecti[selfName].image(thisEvent)
 	myDict= {}
 
 	try:
