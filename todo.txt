@@ -2,6 +2,7 @@
 	a) how to visualize data comparison?
 
 2) make quick start options for publicly available data.  what exactly does this look like?
+	a) make a unique config file for each experiment
 
 3) streamline the config generator.
 
@@ -15,5 +16,12 @@
 	a) potential solution is to do svd on averages of 100 acqiris traces instead of on every trace. this is not elegant since it introduces another arbitrary tuning parameter.
 	b) could mask out regions of svd that only contain noise.
 
-7) make recursive svd parallelizable. I guess it is already. ok, then make an analyzer to condense h5 output into a single useful file.
+7) make recursive svd parallelizable. I guess it is already. ok, then condense h5 output into a single useful file. merge svd from multiple cores into single core.
 
+8) setup jupyter examples to demonstrate how to use
+
+9) script for setting up user .bashrc to source psconda and link their home to their experiments so jupyter can find it.
+
+10) auto detector which config... for slow vs fast cameras? 
+
+11) how to manage non-meaningful-core-number is h5?
