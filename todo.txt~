@@ -28,4 +28,4 @@
 
 12) initialization for analysisFunctions.py.  Zach and Teddy said something about class initialization
 
-13) conditional IPython.embed() that can be turned off once the function is fine tuned.  E.g. for determining the roi of the system
+13) conditional IPython.embed() that can be turned off once the function is fine tuned

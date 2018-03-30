@@ -127,12 +127,17 @@ def genericReturn(detectorObject,thisEvent):
 
 
 def get_projection(detectorObject,thisEvent):
+
+	selfName = detectorObject['self_name']
+	myImage = detectorObject[selfName].raw(thisEvent)
+
 	#IPython.embed()
-	myImage = detectorObject['timeToolOpal'].raw(thisEvent)
+
 	if None == myImage:
 		return (zeros(1024))
 	else:
 		return sum(myImage[370:],axis=0)
+
 
 def genericSummaryZero(detectorObject,thisEvent,previousProcessing):
 	return 0
@@ -226,19 +231,16 @@ def getGMD(detectorObject,thisEvent):
 	selfName = detectorObject['self_name']
 
 	temp = detectorObject[selfName].get(thisEvent)
+	
+	my_dict = {"milliJoulesPerPulse":-99999.0,"milliJoulesAverage":-99999.0,"relativeEnergyPerPulse":999999.0}
+
 	if (None not in [temp]):
-		return temp.milliJoulesPerPulse()
-	else: 	
-		return 0.0
+		my_dict["milliJoulesPerPulse"]=temp.milliJoulesPerPulse()
+		my_dict["milliJoulesAverage"]=temp.milliJoulesAverage()
+		my_dict["relativeEnergyPerPulse"]=temp.relativeEnergyPerPulse()
 
-def getEBeam(detectorObject,thisEvent):
-	selfName = detectorObject['self_name']
+	return my_dict
 
-	temp = detectorObject[selfName].get(thisEvent)
-	if(None not in [temp]):
-		return temp.ebeamPhotonEnergy()
-	else:
-		return 0
 
 #for slow cameras that would crash psana if written every event cause of back filling with zeros
 def slowCameraImageSummarizer(detectorObject,thisEvent,previousProcessing):
@@ -275,3 +277,56 @@ def getDLS(detectorObject, thisEvent):
 
         DLS_PS = detectorObject[selfName].values(thisEvent)[0]
         return {'DLS_PS': DLS_PS}
+
+def peakFunction(x,a,x0,offset):
+	return a*(x-x0)**2+offset
+
+def generic_acqiris_analyzer(detectorObject,thisEvent):
+	selfName = detectorObject['self_name']
+	fit_results = {}
+
+	if(None is detectorObject[selfName](thisEvent)):
+		#fit_results = {'amplitude':popt[2],'uncertainty_cov':pcov[2,2]}
+		return None
+		
+	x = detectorObject[selfName](thisEvent)[1][0]
+	for i in arange(len(detectorObject[selfName](thisEvent)[0])):
+
+		y = detectorObject[selfName](thisEvent)[0][i]
+
+
+		smoothed_wave = convolve(y,[1,1,1,1,1,1],mode='same')
+		initial_peak = argmax(smoothed_wave)	#how to hardcode
+		initial_height = smoothed_wave[initial_peak]
+		peak_width = 4	############################## tunable parameter
+
+		y_small = y[initial_peak-peak_width:initial_peak+peak_width] - mean(y[:])
+		x_small = x[initial_peak-peak_width:initial_peak+peak_width]
+
+		#IPython.embed()
+		try:
+			popt,pcov = curve_fit(peakFunction,x_small,y_small,p0=[0.0,initial_peak,initial_height])
+		
+			fit_results['ch'+str(i)] = {"position":popt[1],'amplitude':popt[2],'position_var':pcov[1,1],'amplitude_var':pcov[2,2]}
+
+		except (RuntimeError,TypeError) as e:
+			#fit_results = None
+			fit_results['ch'+str(i)] = {"position":-999999.0,'amplitude':-999999.0,'position_var':-999999.0,'amplitude_var':-999999.0}
+
+	return fit_results
+
+def getAndorFVBImage(detectorObject,thisEvent):
+	#IPython.embed()
+	selfName = detectorObject['self_name']
+	myImage = detectorObject[selfName].raw(thisEvent)
+	my_dict = {}
+	
+	#IPython.embed()
+	if None == myImage:
+		my_dict['image'] = zeros(2048)
+		#print("None")
+	else:
+		my_dict['image'] = myImage[0]
+		#print(myImage.shape)
+	
+	return my_dict

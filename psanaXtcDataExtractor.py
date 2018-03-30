@@ -111,7 +111,7 @@ def generateDetectorDictionary(configFileName):
 				myDetectorObjectDictionary['summarizer'][myParsedString[3]] = analysisFunctions.__dict__[myParsedString[5]]
 
 		else:
-			continue
+			pass
 
 		if(ttAnalyze is not None):
 			print("casting time tool as detector object")
@@ -181,7 +181,7 @@ def main(myExp, myRun, configFileName,h5FileName,testSample,ttDevice,ttCode,star
 	myEnumeratedEvents = enumerate(myDataSource.events())
 	for eventNumber,thisEvent in myEnumeratedEvents:
 		if(eventNumber %messageFeedBackRate == 1):
-			print("iterating over enumerated events. Rank = "+str(myRank)+" Event number = "+str(eventNumber)+" Elapsed Time (s) = "+str(time.time()-startTime))
+			print("iterating over enumerated events. Rank = "+str(myRank)+" Event number = "+str((myRank+1)*eventNumber)+" Elapsed Time (s) = "+str(time.time()-startTime))
 			
 		if(eventNumber<startEvent):
 			continue
