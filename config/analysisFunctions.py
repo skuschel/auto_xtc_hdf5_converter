@@ -25,14 +25,19 @@ def use_acq_svd_basis(detectorObject, thisEvent):
 	if(None is detectorObject[selfName](thisEvent)):
 		#fit_results = {'amplitude':popt[2],'uncertainty_cov':pcov[2,2]}
 		return None
+
+	if(len(detectorObject[selfName](thisEvent))==4):		#this is temp cludge that will break when hsd is set to two channels
+		the_wave_forms = detectorObject[selfName](thisEvent)
+	else:
+		the_wave_forms = detectorObject[selfName](thisEvent)[0]
 		
 	#x = detectorObject[selfName](thisEvent)[1][0]
-	for i in arange(len(detectorObject[selfName](thisEvent)[0])):
+	for i in arange(len(the_wave_forms)):
 		eigen_traces = eigen_traces_h5py["summary/nonMeaningfulCoreNumber0/"+selfName+"/ch"+str(i)+"/norm_eigen_wave_forms"]
 		#eigen_traces = eigen_traces_h5py["summary/nonMeaningfulCoreNumber0/"+selfName+"/ch"+str(i)+"/eigen_wave_forms"]
 		#eigen_traces = array([eigen_traces[j]/sum(eigen_traces[j]**2)**0.5 for j in arange(len(eigen_traces))])	#not efficient. constantly renormalizing. will optimize later
-		#IPython.embed()
-		y = detectorObject[selfName](thisEvent)[0][i]
+		
+		y = 1.0*the_wave_forms[i]
 		y -= mean(y[config_parameters['offset_mask']])
 		weightings = dot(eigen_traces,y)
 		residuals = y-dot(weightings,eigen_traces)
@@ -49,14 +54,22 @@ def use_acq_svd_basis(detectorObject, thisEvent):
 #######Creating the acqiris eigen basis###############
 ######################################################
 def svd_update(eigen_system,new_vector,config_parameters):
-	
+	roi_mask_start = 2000
+	roi_mask_end = 2500
+
+
 	try:
 		reconstructed_system = dot(eigen_system['eigen_weightings'], eigen_system['eigen_wave_forms'])
 		reconstructed_system = vstack([reconstructed_system,new_vector])
+		
+		roi_mask = zeros(reconstructed_system.shape).astype(bool)
+		roi_mask[:,roi_mask_start:roi_mask_end]=True
+		masked_reconstructed_system = reconstructed_system[roi_mask]
+		masked_reconstructed_system.shape = (len(roi_mask),roi_mask_start-roi_mask_end)
+		
+		#singular_values,svd_lsv = eig(dot(reconstructed_system,reconstructed_system.transpose()))
+		singular_values,svd_lsv = eig(dot(masked_reconstructed_system,masked_reconstructed_system.transpose()))
 
-		
-		singular_values,svd_lsv = eig(dot(reconstructed_system,reconstructed_system.transpose()))
-		
 		new_weightings = dot(svd_lsv,diag(singular_values))
 		new_eigen_vectors = dot(pinv(new_weightings),reconstructed_system)[:config_parameters["eigen_basis_size"]]
 
@@ -93,13 +106,18 @@ def make_acq_svd_basis(detectorObject,thisEvent,previousProcessing):
 	if None is detectorObject[selfName](thisEvent):
 		return None
 
-	for i in arange(len(detectorObject[selfName](thisEvent)[0])):
+	if(len(detectorObject[selfName](thisEvent))==4):
+		the_wave_forms = detectorObject[selfName](thisEvent)
+	else:
+		the_wave_forms = detectorObject[selfName](thisEvent)[0]
+
+	for i in arange(len(the_wave_forms)):
 
 		try:
 			eigen_system["ch"+str(i)] = previousProcessing["ch"+str(i)]
 		except (KeyError,TypeError) as e:
 			try:
-				y =  detectorObject[selfName](thisEvent)[0][i]			
+				y =  1.0*the_wave_forms[i]			
 				y -= mean(y[config_parameters['offset_mask']])			
 				eigen_system["ch"+str(i)]= {'eigen_wave_forms':y,'eigen_weightings':[1],'norm_eigen_wave_forms':[1]}
 			except (KeyError,TypeError) as e:
@@ -109,10 +127,11 @@ def make_acq_svd_basis(detectorObject,thisEvent,previousProcessing):
 	###main part of calculation###
 	##############################
 	new_eigen_system = {}
-	for i in arange(len(detectorObject[selfName](thisEvent)[0])):
+	for i in arange(len(the_wave_forms)):
 
-		
-		new_eigen_system["ch"+str(i)] = svd_update(eigen_system["ch"+str(i)],detectorObject[selfName](thisEvent)[0][i],config_parameters)
+		y = 1.0 *the_wave_forms[i]
+		y -= mean(y[config_parameters['offset_mask']])	
+		new_eigen_system["ch"+str(i)] = svd_update(eigen_system["ch"+str(i)],y,config_parameters)
 		
 
 	return new_eigen_system
