@@ -29,3 +29,7 @@
 12) initialization for analysisFunctions.py.  Zach and Teddy said something about class initialization
 
 13) conditional IPython.embed() that can be turned off once the function is fine tuned.  E.g. for determining the roi of the system
+
+14) added mask to acq eigen maker and made hsd compatible. this is cludge and will break when hsd has two channels
+
+15) need to add mask to acq eigen analysis
