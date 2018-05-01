@@ -36,6 +36,6 @@
 
 16) for svd mask maker, use argsort on averaged waveform
 
-17) generic acqiris analyzer was failing for sxrlr0716. need to figure out why. also add option for integration
+__check__ 17) generic acqiris analyzer was failing for sxrlr0716. need to figure out why. also add option for integration
 
 18) add daq config to summarizier softXRayDataAndControls/myAnalysisTools/reference_notes
