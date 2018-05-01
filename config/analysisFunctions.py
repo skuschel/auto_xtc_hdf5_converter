@@ -150,7 +150,7 @@ def get_projection(detectorObject,thisEvent):
 	selfName = detectorObject['self_name']
 	myImage = detectorObject[selfName].raw(thisEvent)
 
-	#IPython.embed()
+	
 
 	if None == myImage:
 		return (zeros(1024))
@@ -202,7 +202,7 @@ def getPeak(detectorObject,thisEvent):
 	#myMax = max(p(x))
 	#return myMax	
 
-	#IPython.embed()
+	
 	try:
 		popt,pcov = curve_fit(peakFunction,x,myWaveForm[7500:10000])
 		
@@ -266,7 +266,7 @@ def slowCameraImageSummarizer(detectorObject,thisEvent,previousProcessing):
 		
 	selfName = detectorObject['self_name']
 	#return detectorObject.image(thisEvent)
-	tempImage = detectorObjecti[selfName].image(thisEvent)
+	tempImage = detectorObject[selfName].image(thisEvent)
 	myDict= {}
 
 	try:
@@ -301,6 +301,8 @@ def peakFunction(x,a,x0,offset):
 	return a*(x-x0)**2+offset
 
 def generic_acqiris_analyzer(detectorObject,thisEvent):
+
+	peak_width = 4	############################## tunable parameter. needs to be different for each trace.
 	selfName = detectorObject['self_name']
 	fit_results = {}
 
@@ -317,30 +319,35 @@ def generic_acqiris_analyzer(detectorObject,thisEvent):
 		smoothed_wave = convolve(y,[1,1,1,1,1,1],mode='same')
 		initial_peak = argmax(smoothed_wave)	#how to hardcode
 		initial_height = smoothed_wave[initial_peak]
-		peak_width = 4	############################## tunable parameter
 
 		y_small = y[initial_peak-peak_width:initial_peak+peak_width] - mean(y[:])
 		x_small = x[initial_peak-peak_width:initial_peak+peak_width]
 
-		#IPython.embed()
+		fit_results['ch'+str(i)] = {"position":-999999.0,'area':-999999.0,'position_var':-999999.0,'amplitude_var':-999999.0}
+
 		try:
+			fit_results['ch'+str(i)]['area']=sum(y_small)
+
 			popt,pcov = curve_fit(peakFunction,x_small,y_small,p0=[0.0,initial_peak,initial_height])
 		
-			fit_results['ch'+str(i)] = {"position":popt[1],'amplitude':popt[2],'position_var':pcov[1,1],'amplitude_var':pcov[2,2]}
+			fit_results['ch'+str(i)]["position"]      = popt[1]
+			fit_results['ch'+str(i)]['amplitude']     = popt[2]
+			fit_results['ch'+str(i)]['position_var']  = pcov[1,1]
+			fit_results['ch'+str(i)]['amplitude_var'] = pcov[2,2]
 
 		except (RuntimeError,TypeError) as e:
-			#fit_results = None
-			fit_results['ch'+str(i)] = {"position":-999999.0,'amplitude':-999999.0,'position_var':-999999.0,'amplitude_var':-999999.0}
+			print("fitting failed")
+			pass
 
 	return fit_results
 
 def getAndorFVBImage(detectorObject,thisEvent):
-	#IPython.embed()
+	
 	selfName = detectorObject['self_name']
 	myImage = detectorObject[selfName].raw(thisEvent)
 	my_dict = {}
 	
-	#IPython.embed()
+	
 	if None == myImage:
 		my_dict['image'] = zeros(2048)
 		#print("None")

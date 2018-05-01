@@ -181,7 +181,7 @@ def main(myExp, myRun, configFileName,h5FileName,testSample,ttDevice,ttCode,star
 	myEnumeratedEvents = enumerate(myDataSource.events())
 	for eventNumber,thisEvent in myEnumeratedEvents:
 		if(eventNumber %messageFeedBackRate == 1):
-			print("iterating over enumerated events. Rank = "+str(myRank)+" Event number = "+str((myRank+1)*eventNumber)+" Elapsed Time (s) = "+str(time.time()-startTime))
+			print("iterating over enumerated events. Rank = "+str(myRank)+" Event number = "+str(myRank+eventNumber)+" Elapsed Time (s) = "+str(time.time()-startTime))
 			
 		if(eventNumber<startEvent):
 			continue

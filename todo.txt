@@ -33,3 +33,9 @@
 14) added mask to acq eigen maker and made hsd compatible. this is cludge and will break when hsd has two channels
 
 15) need to add mask to acq eigen analysis
+
+16) for svd mask maker, use argsort on averaged waveform
+
+17) generic acqiris analyzer was failing for sxrlr0716. need to figure out why. also add option for integration
+
+18) add daq config to summarizier softXRayDataAndControls/myAnalysisTools/reference_notes
