@@ -26,11 +26,10 @@ def use_acq_svd_basis(detectorObject, thisEvent):
 		#fit_results = {'amplitude':popt[2],'uncertainty_cov':pcov[2,2]}
 		return None
 
-	#if(len(detectorObject[selfName](thisEvent))==4):		#this is temp cludge that will break when hsd is set to two channels
-	if("acq" in selfName.lower()):							#requires config file alias to have acq in it
-		the_wave_forms = detectorObject[selfName](thisEvent)[0]
-	else:
+	if(len(detectorObject[selfName](thisEvent))==4):		#this is temp cludge that will break when hsd is set to two channels
 		the_wave_forms = detectorObject[selfName](thisEvent)
+	else:
+		the_wave_forms = detectorObject[selfName](thisEvent)[0]
 		
 	#x = detectorObject[selfName](thisEvent)[1][0]
 	for i in arange(len(the_wave_forms)):
@@ -55,8 +54,8 @@ def use_acq_svd_basis(detectorObject, thisEvent):
 #######Creating the acqiris eigen basis###############
 ######################################################
 def svd_update(eigen_system,new_vector,config_parameters):
-	roi_mask_start = 1
-	roi_mask_end = -1
+	roi_mask_start = 2000
+	roi_mask_end = 2500
 
 
 	try:
@@ -107,11 +106,10 @@ def make_acq_svd_basis(detectorObject,thisEvent,previousProcessing):
 	if None is detectorObject[selfName](thisEvent):
 		return None
 
-	#if(len(detectorObject[selfName](thisEvent))==4):
-	if("acq" in selfName.lower()):
-		the_wave_forms = detectorObject[selfName](thisEvent)[0]
-	else:
+	if(len(detectorObject[selfName](thisEvent))==4):
 		the_wave_forms = detectorObject[selfName](thisEvent)
+	else:
+		the_wave_forms = detectorObject[selfName](thisEvent)[0]
 
 	for i in arange(len(the_wave_forms)):
 
