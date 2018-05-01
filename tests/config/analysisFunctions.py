@@ -54,7 +54,7 @@ def use_acq_svd_basis(detectorObject, thisEvent):
 #######Creating the acqiris eigen basis###############
 ######################################################
 def svd_update(eigen_system,new_vector,config_parameters):
-	roi_mask_start = 2000
+	roi_mask_start = 1000
 	roi_mask_end = 2500
 
 
