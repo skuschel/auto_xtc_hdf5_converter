@@ -356,3 +356,10 @@ def getAndorFVBImage(detectorObject,thisEvent):
 		#print(myImage.shape)
 	
 	return my_dict
+
+def getMonoEncoderValues(detectorObject,thisEvent):
+	selfName = detectorObject['self_name']
+	to_return = [0.0,0.0,0.0,0.0]
+	if(None != detectorObject[selfName].values(thisEvent)):
+		to_return = detectorObject[selfName].values(thisEvent)
+	return to_return

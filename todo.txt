@@ -43,3 +43,4 @@ __check__ 17) generic acqiris analyzer was failing for sxrlr0716. need to figure
 19) add rank to detector object. (done for some previous users. will allow for mpi collect on ffb nodes for hit finding)
 MPIDataSource('exp=sxrx22915:run='+runnum+':smd:dir=/reg/d/ffb/sxr/sxrx22915/xtc:live')
 
+20) make destination default small_data
