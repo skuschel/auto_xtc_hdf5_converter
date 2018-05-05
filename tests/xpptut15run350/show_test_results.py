@@ -19,7 +19,7 @@ def hdf5_to_dict(myhdf5Object):
 
 	return replacementDictionary
 
-file_name = "xpptut15run350.h5"
+file_name = "hdf5/xpptut15run350.h5"
 my_hdf5_object = h5py.File(file_name,'r')
 
 my_list = []

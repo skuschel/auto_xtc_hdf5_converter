@@ -54,6 +54,8 @@ ttAnalyze = None
 def makeDataSourceAndSmallData(experimentNameAndRun,h5FileName,ttDevice,ttCode):
 	global ttAnalyze
 	smldata = "None"
+	small_hdf5_dir = "hdf5"
+	os.system("mkdir "+small_hdf5_dir)
 	if(ttDevice is not None ):
 
 		print("setting up time tool.") 
@@ -65,16 +67,18 @@ def makeDataSourceAndSmallData(experimentNameAndRun,h5FileName,ttDevice,ttCode):
 		print("loading experiment data using standard small data")
 		myDataSource = psana.MPIDataSource(experimentNameAndRun,module=ttAnalyze)	
 
+		
+
 		print("defining small data")
 		if(h5FileName!="None"):
-			smldata = myDataSource.small_data(h5FileName)
+			smldata = myDataSource.small_data(small_hdf5_dir+"/"+h5FileName)
 	else:
 		print("loading mpi data source")
 		myDataSource = psana.MPIDataSource(experimentNameAndRun)
 
 		print("defining small data. hook in place ")
 		if(h5FileName!="None"):
-			smldata = myDataSource.small_data(h5FileName)
+			smldata = myDataSource.small_data(small_hdf5_dir+"/"+h5FileName)
 
 
 	return (myDataSource,smldata)
