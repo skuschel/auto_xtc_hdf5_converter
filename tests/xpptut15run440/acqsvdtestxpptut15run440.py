@@ -25,18 +25,8 @@ def hdf5_to_dict(myhdf5Object):
 	return replacementDictionary
 
 def main(fileName):
-	#global myDict
 	global my_dict
-	#f = h5py.File("sxr10116run73.h5",'r')
-	#f = h5py.File(fileName,'r')
-	my_hdf5_object = h5py.File("xpptut15run440.h5",'r')
-	#f = h5py.File("sxrx24615run21.h5",'r')
-	#for i in f:
-	#	print(str(i))
-	#	print(str(array(f[i])[:10]))
-	#f.close()
-	#myDict= hdf5_to_dict(f)
-
+	my_hdf5_object = h5py.File("hdf5/xpptut15run440.h5",'r')
 	#convert hdf5 to dict
 	my_list = []
 	def func(name, obj):
@@ -56,7 +46,7 @@ def main(fileName):
 
 	#%matplotlib
 	acqiris_alias="Acq02"
-	eigen_basis_file = "eigen_traces.h5"
+	eigen_basis_file = "hdf5/xpptut15run440_eigen_basis.h5"
 	experiment_name = "xpptut15"
 	run_number = "440"
 	channel_number=3

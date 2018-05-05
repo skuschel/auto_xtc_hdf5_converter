@@ -9,15 +9,25 @@ import h5py
 #######Using the eigen traces#########################
 ######################################################
 
-try:
-	eigen_traces_h5py=h5py.File("eigen_traces.h5")
+#try:
+	#eigen_traces_h5py=h5py.File("eigen_traces.h5")
 	#eigen_traces = f['summary/nonMeaningfulCoreNumber0/Acq01/ch1/eigen_wave_forms']
-except:
-	print("eigen_traces.h5 not found")
-	pass
+#except:
+#	print("eigen_traces.h5 not found")
+#	pass
 
 
 def use_acq_svd_basis(detectorObject, thisEvent):
+	global eigen_traces_h5py
+	try:
+		temp = eigen_traces_h5py.keys()
+	except:
+		eigen_file = "hdf5/"+detectorObject['h5FileName'][:-3]+"_eigen_basis.h5"
+		eigen_traces_h5py=h5py.File(eigen_file)
+		print("loaded "+eigen_file)
+
+	#print("going into embed")
+	#IPython.embed()
 	selfName = detectorObject['self_name']
 	my_results = {}
 	config_parameters = {"thresh_hold":0.05,"waveform_mask":arange(1200,1230),"eigen_basis_size":25,"offset_mask":arange(300)}
@@ -287,8 +297,6 @@ def slowCameraImageSummarizer(detectorObject,thisEvent,previousProcessing):
 
 def getDLS(detectorObject, thisEvent):
         selfName = detectorObject['self_name']
-
-        # IPython.embed()
 
         if detectorObject[selfName].values(thisEvent) is None:
                 myDictionary = {'DLS_PS': -999.0}

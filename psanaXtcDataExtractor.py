@@ -172,6 +172,10 @@ def main(myExp, myRun, configFileName,h5FileName,testSample,ttDevice,ttCode,star
 	print("loading detector object dictionary")
 	myDetectorObjectDictionary = generateDetectorDictionary(configFileName)
 	print("detector object dictionary loaded")
+	myDetectorObjectDictionary['rank'] = myRank
+	myDetectorObjectDictionary['data_source'] = myDataSource
+	myDetectorObjectDictionary['h5FileName'] = h5FileName
+	print("supplemental data added to detector object dictionary ")
 	
 	print("initializing data dictionaries")
 	myDataDictionary,summaryDataDictionary = initializeDataDictionaries(myDetectorObjectDictionary)
