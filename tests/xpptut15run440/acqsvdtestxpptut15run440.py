@@ -50,7 +50,8 @@ def main(fileName):
 	experiment_name = "xpptut15"
 	run_number = "440"
 	channel_number=3
-	event_number = 80
+	event_number = int(200 * rand())
+	print("event number number for testing: "+str(event_number))
 	####################
 	#####################
 
@@ -68,6 +69,8 @@ def main(fileName):
 
 	plot(acq_det_obj(this_event)[0][channel_number]-mean(acq_det_obj(this_event)[0][channel_number][:300]))
 	plot(dot(my_dict[acqiris_alias+'/ch'+str(channel_number)+'/weightings'][evt_num], eig_bas),'r.')
+	ylim(-0.06,0.0)
+	xlim(1100,1400)
 	show()
 
 if __name__ == '__main__':
