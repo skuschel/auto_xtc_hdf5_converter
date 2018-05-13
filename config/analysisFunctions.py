@@ -385,3 +385,19 @@ def miniTOF(detobj, thisEvent):
 	#iTOF_yield = np.mean(minitof_volts[6700:8000]) - np.mean(minitof_volts[-1000:])
 	bg = np.mean(minitof_volts[-1000:])
 	return dict(volts=minitof_volts-bg, bg=bg)
+
+
+def pnccd_image(detobj, thisEvent):
+	selfName = detobj['self_name']
+	image = detobj[selfName].image(thisEvent)
+	if image is None:
+		return None
+	return dict(image=image)
+
+
+
+
+
+
+
+
