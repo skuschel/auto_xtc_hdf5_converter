@@ -153,7 +153,8 @@ def make_acq_svd_basis(detectorObject,thisEvent,previousProcessing):
 		wave_to_plot = new_eigen_system["ch2"]['norm_eigen_wave_forms']
 		to_plot = XYPlot(time.time(),"eigen_system",[arange(len(wave_to_plot[0])),arange(len(wave_to_plot[0]))],[wave_to_plot[0],wave_to_plot[1]])
 		publish.send('eigen_system_'+selfName,to_plot)
-		#psplot -s hostname -p 12303 eigen_system	
+		#psplot -s hostname -p 12303 eigen_system
+		print(new_eigen_system["ch2"]['norm_eigen_wave_forms'].shape)
 	except:
 		pass
 
