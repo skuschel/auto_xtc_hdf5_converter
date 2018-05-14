@@ -6,6 +6,7 @@ from scipy.signal import savgol_filter
 import h5py
 from psmon.plots import MultiPlot,Image,XYPlot
 from psmon import publish
+import time
 
 ######################################################
 #######Using the eigen traces#########################
@@ -87,8 +88,9 @@ def svd_update(eigen_system,new_vector,config_parameters):
 
 		norm_eigen_vectors = real(array([new_eigen_vectors[i]/sum(new_eigen_vectors[i]**2)**0.5 for i in arange(len(new_eigen_vectors))]))
 
-		eigen_system = {'eigen_weightings':new_weightings,'eigen_wave_forms':new_eigen_vectors,'norm_eigen_wave_forms':norm_eigen_vectors}
+		eigen_system = {'eigen_weightings':new_weightings[:,:config_parameters["eigen_basis_size"]] ,'eigen_wave_forms':new_eigen_vectors,'norm_eigen_wave_forms':norm_eigen_vectors}
 	
+
 	except TypeError:
 		if ((None is new_vector) and (len(eigen_system['eigen_weightings'])>1)):
 			pass
@@ -98,7 +100,6 @@ def svd_update(eigen_system,new_vector,config_parameters):
 			eigen_system['norm_eigen_wave_forms'] = new_vector
 
 	except ValueError:
-		
 		if (1==len(eigen_system['eigen_weightings'])):
 			eigen_system['eigen_weightings'] = array([[1,0],[0,1]])
 			eigen_system['eigen_wave_forms'] = vstack([eigen_system['eigen_wave_forms'],new_vector])
@@ -150,7 +151,7 @@ def make_acq_svd_basis(detectorObject,thisEvent,previousProcessing):
 	########################################################
 	try:
 		wave_to_plot = new_eigen_system["ch2"]['norm_eigen_wave_forms']
-		to_plot = XYPlot(0,"eigen_system",[arange(len(wave_to_plot[0])),arange(len(wave_to_plot[0]))],[wave_to_plot[0],wave_to_plot[1]])
+		to_plot = XYPlot(time.time(),"eigen_system",[arange(len(wave_to_plot[0])),arange(len(wave_to_plot[0]))],[wave_to_plot[0],wave_to_plot[1]])
 		publish.send('eigen_system_'+selfName,to_plot)
 		#psplot -s hostname -p 12303 eigen_system	
 	except:
