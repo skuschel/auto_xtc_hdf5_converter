@@ -4,6 +4,8 @@ import IPython
 from scipy.optimize import curve_fit
 from scipy.signal import savgol_filter
 import h5py
+from psmon.plots import MultiPlot,Image,XYPlot
+from psmon import publish
 
 ######################################################
 #######Using the eigen traces#########################
@@ -142,7 +144,21 @@ def make_acq_svd_basis(detectorObject,thisEvent,previousProcessing):
 		y = 1.0 *the_wave_forms[i]
 		y -= mean(y[config_parameters['offset_mask']])	
 		new_eigen_system["ch"+str(i)] = svd_update(eigen_system["ch"+str(i)],y,config_parameters)
-		
+
+	########################################################
+	########plotting for real time SVD debugging############
+	########################################################
+	try:
+		wave_to_plot = new_eigen_system["ch2"]['norm_eigen_wave_forms']
+		to_plot = XYPlot(0,"eigen_system",[arange(len(wave_to_plot[0])),arange(len(wave_to_plot[0]))],[wave_to_plot[0],wave_to_plot[1]])
+		publish.send('eigen_system_'+selfName,to_plot)
+		#psplot -s hostname -p 12303 eigen_system	
+	except:
+		pass
+
+	########################################################
+	########end of  SVD debugging###########################
+	########################################################
 
 	return new_eigen_system
 
