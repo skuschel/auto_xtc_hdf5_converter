@@ -32,7 +32,7 @@ def use_acq_svd_basis(detectorObject, thisEvent):
 	#IPython.embed()
 	selfName = detectorObject['self_name']
 	my_results = {}
-	config_parameters = {"thresh_hold":0.05,"waveform_mask":arange(1200,1230),"eigen_basis_size":25,"offset_mask":arange(300)}
+	config_parameters = {"thresh_hold":0.05,"waveform_mask":arange(1100,1700),"eigen_basis_size":25,"offset_mask":arange(300)}
 
 	if(None is detectorObject[selfName](thisEvent)):
 		#fit_results = {'amplitude':popt[2],'uncertainty_cov':pcov[2,2]}
