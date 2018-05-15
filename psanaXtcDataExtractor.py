@@ -180,7 +180,7 @@ def main(myExp, myRun, configFileName,h5FileName,testSample,ttDevice,ttCode,star
 	print("initializing data dictionaries")
 	myDataDictionary,summaryDataDictionary = initializeDataDictionaries(myDetectorObjectDictionary)
 
-	messageFeedBackRate = 20+0*80*int(testSample==False)
+	messageFeedBackRate = 20+980*int(testSample==False)
 	
 	print("iterating over enumerated events")
 	if(myRank==0):

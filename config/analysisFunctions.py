@@ -29,8 +29,6 @@ def use_acq_svd_basis(detectorObject, thisEvent):
 		eigen_traces_h5py=h5py.File(eigen_file)
 		print("loaded "+eigen_file)
 
-	#print("going into embed")
-	#IPython.embed()
 	selfName = detectorObject['self_name']
 	my_results = {}
 	config_parameters = {"thresh_hold":0.05,"waveform_mask":arange(1100,1700),"eigen_basis_size":25,"offset_mask":arange(300)}
@@ -88,7 +86,7 @@ def svd_update(eigen_system,new_vector,config_parameters):
 
 		norm_eigen_vectors = real(array([new_eigen_vectors[i]/sum(new_eigen_vectors[i]**2)**0.5 for i in arange(len(new_eigen_vectors))]))
 
-		eigen_system = {'eigen_weightings':new_weightings[:,:config_parameters["eigen_basis_size"]] ,'eigen_wave_forms':new_eigen_vectors,'norm_eigen_wave_forms':norm_eigen_vectors}
+		eigen_system = {'eigen_weightings':new_weightings[:config_parameters["eigen_basis_size"],:config_parameters["eigen_basis_size"]] ,'eigen_wave_forms':new_eigen_vectors,'norm_eigen_wave_forms':norm_eigen_vectors}
 	
 
 	except TypeError:
@@ -143,8 +141,13 @@ def make_acq_svd_basis(detectorObject,thisEvent,previousProcessing):
 	for i in arange(len(the_wave_forms)):
 
 		y = 1.0 *the_wave_forms[i]
-		y -= mean(y[config_parameters['offset_mask']])	
+		y -= mean(y[config_parameters['offset_mask']])
+		start_time = time.time()
 		new_eigen_system["ch"+str(i)] = svd_update(eigen_system["ch"+str(i)],y,config_parameters)
+	
+	#print(time.time() - start_time)
+	#for j in eigen_system["ch"+str(i)]:
+	#	print(str(j)+", "+str(eigen_system["ch"+str(i)][j].shape))
 
 	########################################################
 	########plotting for real time SVD debugging############
@@ -154,7 +157,6 @@ def make_acq_svd_basis(detectorObject,thisEvent,previousProcessing):
 		to_plot = XYPlot(time.time(),"eigen_system",[arange(len(wave_to_plot[0])),arange(len(wave_to_plot[0]))],[wave_to_plot[0],wave_to_plot[1]])
 		publish.send('eigen_system_'+selfName,to_plot)
 		#psplot -s hostname -p 12303 eigen_system
-		print(new_eigen_system["ch2"]['norm_eigen_wave_forms'].shape)
 	except:
 		pass
 
