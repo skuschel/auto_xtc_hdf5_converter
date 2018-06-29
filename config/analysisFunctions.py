@@ -152,6 +152,7 @@ def make_acq_svd_basis(detectorObject,thisEvent,previousProcessing):
 	########################################################
 	########plotting for real time SVD debugging############
 	########################################################
+	publish.local=True
 	try:
 		wave_to_plot = new_eigen_system["ch2"]['norm_eigen_wave_forms']
 		to_plot = XYPlot(time.time(),"eigen_system",[arange(len(wave_to_plot[0])),arange(len(wave_to_plot[0]))],[wave_to_plot[0],wave_to_plot[1]])
