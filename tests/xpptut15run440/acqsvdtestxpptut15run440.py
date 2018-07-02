@@ -68,7 +68,7 @@ def main(fileName):
 	#plot(acq_det_obj(this_event)[0][channel_number]-mean(acq_det_obj(this_event)[0][channel_number][:300]))
 
 	plot(acq_det_obj(this_event)[0][channel_number]-mean(acq_det_obj(this_event)[0][channel_number][:300]))
-	plot(dot(my_dict[acqiris_alias+'/ch'+str(channel_number)+'/weightings'][evt_num], eig_bas),'r.')
+	plot(dot(my_dict[acqiris_alias+'/ch'+str(channel_number)+'/weightings'][my_index], eig_bas),'r.')
 	ylim(-0.06,0.0)
 	xlim(1100,1400)
 	show()
