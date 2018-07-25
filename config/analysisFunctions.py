@@ -395,6 +395,19 @@ def pnccd_image(detobj, thisEvent):
 	return dict(image=image)
 
 
+def xtcav_retrieval(detobj, thisEvent):
+	selfName=detobj['self_name']
+	from xtcav.ShotToShotCharacterization import ShotToShotCharacterization
+	XTCAVRetrieval = ShotToShotCharacterization()
+	XTCAVRetrieval.SetCurrentEvent(thisEvent)
+	try:
+	    img = XTCAVRetrieval.ProcessedXTCAVImage()
+	except AttributeError:
+	    return None
+	if not img[1]:
+	    return None
+	return img
+
 
 
 
