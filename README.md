@@ -6,6 +6,9 @@ This package separates the science analysis from the psana overhead when convert
 Examples can be found in the 'tests' folder.  They use the publicly available practice data
 https://confluence.slac.stanford.edu/display/PSDM/Publicly+Available+Practice+Data
 
+run the test.sh scripts to execute the example. (some of them require "X forwarding")
+
+
 The purpose of the examples in this repository is to allow users to copy one of the test directories, tweak the files, and start analyzing their own data.
 The test.sh scripts found in directories starting with 'xpp' can be run directly.
 Make sure to ssh to a psana machine before trying to run these scripts.
