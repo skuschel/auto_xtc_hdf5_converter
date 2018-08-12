@@ -25,12 +25,19 @@ def main():
 	U_updated,s_updated,V_updated = svd(X,full_matrices = False)
 
 	plt.ion()
-	fig = plt.figure()
-	ax = fig.add_subplot(111)
-	line1, = ax.plot(x,X[:,-1])
-	line2, = ax.plot(x,X[:,-1],'o')
+	#fig = plt.figure()
+	#ax = fig.add_subplot(111)
+	fig, ax_list = plt.subplots(1, 2)
+	line1, = ax_list[0].plot(x,X[:,-1])
+	line2, = ax_list[0].plot(x,X[:,-1],'o')
+	line3, = ax_list[1].plot(arange(2),arange(2))
+	line4, = ax_list[1].plot(arange(2),arange(2))
+
 	plt.pause(0.0001)
 	
+	update_L2_norm = []
+	standard_L2_norm = []
+
 	for i in arange(initial_stack_size,y_stack.shape[0]):
 
 		#standard SVD for baseline comparison
@@ -41,7 +48,7 @@ def main():
 
 		standard_svd_reconstructed = dot(dot(U,diag(s)),V)
 
-		standard_L2_norm = sum((standard_svd_reconstructed-X)**2)
+		standard_L2_norm.append(sum((standard_svd_reconstructed-X)**2))
 
 		#update SVD under test
 
@@ -49,13 +56,19 @@ def main():
 		U_updated,s_updated,V_updated = svd_rank_one_update(U_updated,s_updated,V_updated,a)	
 		update_reconstructed = dot(dot(U_updated,diag(s_updated)),V_updated)
 	
-		update_L2_norm = sum((update_reconstructed-X)**2)
+		update_L2_norm.append(sum((update_reconstructed-X)**2))
 		
-		print(str(standard_L2_norm)+", "+str(update_L2_norm))
+		print(str(standard_L2_norm[-1])+", "+str(update_L2_norm[-1]))
 
 		#visualization
 		line1.set_ydata(a)
 		line2.set_ydata(update_reconstructed[:,-1])
+		line3.set_xdata(arange(len(standard_L2_norm)))
+		line4.set_xdata(arange(len(update_L2_norm)))
+		line3.set_ydata(standard_L2_norm)
+		line4.set_ydata(update_L2_norm)
+		ax_list[1].set_xlim(0,len(standard_L2_norm))
+		ax_list[1].set_ylim(0,max(update_L2_norm))
 		plt.pause(0.0001)
 		fig.canvas.draw()
 		plt.pause(0.0001)
