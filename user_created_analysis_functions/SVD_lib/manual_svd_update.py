@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 ##########################################
 ##########################################
 # File and Version Information:
@@ -21,7 +22,8 @@
 ## Available online 27 September 2005
 ## Submitted by Kugazov
 ## equation numbers referenced in this implementation refer to the equations in the publication above 
-## 
+## purpose is to validate functionality and reduce memory load
+## speed optimization will be iplemented closer to silicon
 ##########################################
 ##########################################
 ##########################################
@@ -31,13 +33,13 @@ import IPython
 
 DEBUG = False
 
-def svd_rank_one_update(U,s,V,X,a):
+def svd_rank_one_update(U,s,V,a):
 
 	##############################
     #####   Table 1   ############
     ##############################
  
-	b = zeros(X.shape[1]+1)
+	b = zeros(len(s)+1)
 	b[-1] = 1
 
 	##############################
@@ -74,6 +76,7 @@ def svd_rank_one_update(U,s,V,X,a):
 	V_Q = vstack([V.transpose(),Q]).transpose()       #V_Q = [V Q] from equation 5
 	
 	eig_vals , eig_vec = eig(K)                       #from text above equation 5 but after equation 4
+													  #sparse matrix will improve performance
 
 	U_P_dot_Up = dot(U_P,eig_vec)
 	V_Q_dot_Vq = dot(inv(eig_vec),V_Q)
@@ -108,7 +111,7 @@ def main():
 	U,s,V = svd(X,full_matrices = False)
 	a = y_stack[5]
 
-	U_updated,s_updated,V_updated = svd_rank_one_update(U,s,V,X,a)
+	U_updated,s_updated,V_updated = svd_rank_one_update(U,s,V,a)
 
 	reconstructed = dot(dot(U_updated,diag(s_updated)),V_updated)
 
