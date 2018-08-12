@@ -24,7 +24,12 @@ def main():
 
 	U_updated,s_updated,V_updated = svd(X,full_matrices = False)
 
-	f, axarr = plt.subplots(1,2)
+	plt.ion()
+	fig = plt.figure()
+	ax = fig.add_subplot(111)
+	line1, = ax.plot(x,X[:,-1])
+	line2, = ax.plot(x,X[:,-1],'o')
+	plt.pause(0.0001)
 	
 	for i in arange(initial_stack_size,y_stack.shape[0]):
 
@@ -36,7 +41,7 @@ def main():
 
 		standard_svd_reconstructed = dot(dot(U,diag(s)),V)
 
-		standard_L2_norm = sum((standard_svd_reconstructed[:,-1]-X[:,-1])**2)
+		standard_L2_norm = sum((standard_svd_reconstructed-X)**2)
 
 		#update SVD under test
 
@@ -44,10 +49,18 @@ def main():
 		U_updated,s_updated,V_updated = svd_rank_one_update(U_updated,s_updated,V_updated,a)	
 		update_reconstructed = dot(dot(U_updated,diag(s_updated)),V_updated)
 	
-		update_L2_norm = sum((update_reconstructed[:,-1]-a)**2)
+		update_L2_norm = sum((update_reconstructed-X)**2)
 		
 		print(str(standard_L2_norm)+", "+str(update_L2_norm))
 
+		#visualization
+		line1.set_ydata(a)
+		line2.set_ydata(update_reconstructed[:,-1])
+		plt.pause(0.0001)
+		fig.canvas.draw()
+		plt.pause(0.0001)
+		fig.canvas.flush_events()
+		plt.pause(0.0001)
 
 	axarr[0,0].plot()
 
