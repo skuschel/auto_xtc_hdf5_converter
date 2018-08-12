@@ -31,27 +31,6 @@ import IPython
 
 DEBUG = False
 
-##########################################
-## creating test data
-##########################################
-
-def y(t,f,a,tau,phi):
-	return a*exp(-t/tau)*sin(2*pi*f*x+phi)
-
-if(DEBUG):
-	figure(0)
-	plot(x,y(x,1.0,1.0,3,0))
-	show()
-
-x = arange (0,10,0.1)
-y_stack = y(x,1.0,1.0,3,0)
-for i in arange(1000):
-	y_stack = vstack([y_stack,y(x,1.0*(0.9+rand()/5),1.0*(0.9+rand()/5),3*(0.9+rand()/5),0)])
-
-##########################################
-## SVD update
-##########################################
-
 def svd_rank_one_update(U,s,V,X,a):
 
 	##############################
@@ -101,19 +80,45 @@ def svd_rank_one_update(U,s,V,X,a):
 
 	return U_P_dot_Up,eig_vals,V_Q_dot_Vq             # udpated_u, updated_s,updated_v
 
-#selecting and conditioning data 
-X = y_stack[:5].transpose()	
-U,s,V = svd(X,full_matrices = False)
-a = y_stack[5]
+def main():
 
-U_updated,s_updated,V_updated = svd_rank_one_update(U,s,V,X,a)
+	##########################################
+	## creating test data
+	##########################################
 
-reconstructed = dot(dot(U_updated,diag(s_updated)),V_updated)
+	def y(t,f,a,tau,phi):
+		return a*exp(-t/tau)*sin(2*pi*f*x+phi)
 
-for i in arange(6):
-	figure(i)
-	plot(reconstructed[:,i])
-	plot(y_stack[i],'o')
+	if(DEBUG):
+		figure(0)
+		plot(x,y(x,1.0,1.0,3,0))
+		show()
 
-show()
+	x = arange (0,10,0.1)
+	y_stack = y(x,1.0,1.0,3,0)
+	for i in arange(1000):
+		y_stack = vstack([y_stack,y(x,1.0*(0.9+rand()/5),1.0*(0.9+rand()/5),3*(0.9+rand()/5),0)])
+
+	##########################################
+	## SVD update
+	##########################################
+
+	#selecting and conditioning data 
+	X = y_stack[:5].transpose()	
+	U,s,V = svd(X,full_matrices = False)
+	a = y_stack[5]
+
+	U_updated,s_updated,V_updated = svd_rank_one_update(U,s,V,X,a)
+
+	reconstructed = dot(dot(U_updated,diag(s_updated)),V_updated)
+
+	for i in arange(6):
+		figure(i)
+		plot(reconstructed[:,i])
+		plot(y_stack[i],'o')
+
+	show()
+
+if __name__ == '__main__':
+	main()
 
