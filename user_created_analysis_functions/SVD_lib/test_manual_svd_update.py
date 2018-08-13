@@ -61,7 +61,9 @@ def main():
 		
 			if(update_L2_norm>1e500 and i>20):
 				print("recentering  (not accurate description)")
-				U_updated,s_updated,V_updated = svd(update_reconstructed,full_matrices=False)	#this works, and it's only doing it on the reconstructed, not on the full. 
+				#U_temp, s_temp,V_temp = svd(update_reconstructed,full_matrices=False)				
+				#IPython.embed()
+				#U_updated,s_updated,V_updated = svd(update_reconstructed,full_matrices=False)	#this works, and it's only doing it on the reconstructed, not on the full. 
 																								#but doing it too frequently. Still, this is more memory efficient.
 																								#not really cause the reconstructed takes up just as much mem as the original
 

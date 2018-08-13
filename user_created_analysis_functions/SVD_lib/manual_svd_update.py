@@ -86,7 +86,10 @@ def svd_rank_one_update(U,s,V,a):
 	U_P_dot_Up = dot(U_P,eig_vec)[:len(a),:len(a)+extra_buffer]							   #truncating improves memory usage but costs
 	V_Q_dot_Vq = dot(inv(eig_vec),V_Q)[:len(a)+extra_buffer,:]							   #stability.
 
-	return U_P_dot_Up,eig_vals,V_Q_dot_Vq             									   #udpated_u, updated_s,updated_v
+	#Use implementation described by equation 11
+	#i.e. stop updating U and instead keep track of U_prime
+
+	return U_P_dot_Up,eig_vals,V_Q_dot_Vq             									   # udpated_u, updated_s,updated_v
 
 def main():
 
