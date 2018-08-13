@@ -44,21 +44,30 @@ def main():
 
 		X = y_stack[:(i+1)].transpose()
 
-		U,s,V = svd(X,full_matrices=False)
+		U,s,V = svd(X,full_matrices=True)
 
-		standard_svd_reconstructed = dot(dot(U,diag(s)),V)
+		try:
+			S = zeros([U.shape[0],V.shape[0]])
+			S[:len(s),:len(s)] += diag(s)
+			standard_svd_reconstructed = dot(dot(U,S),V)
+		except:
+			IPython.embed()
 
 		standard_L2_norm.append(sum((standard_svd_reconstructed-X)**2))
 
 		#update SVD under test
 
 		a = X[:,-1]
+		
 		U_updated,s_updated,V_updated = svd_rank_one_update(U_updated,s_updated,V_updated,a)	
+
 		update_reconstructed = dot(dot(U_updated,diag(s_updated)),V_updated)
 	
 		update_L2_norm.append(sum((update_reconstructed-X)**2))
 		
-		print(str(standard_L2_norm[-1])+", "+str(update_L2_norm[-1]))
+		#print(str(standard_L2_norm[-1])+", "+str(update_L2_norm[-1]))
+		#print("V.shape = "+str(V_updated.shape)+", s_updated.shape = "+str(s_updated.shape)+", U.shape = "+str(U_updated.shape))
+		print("V.shape = "+str(V.shape)+", s.shape = "+str(s.shape)+", U.shape = "+str(U.shape))
 
 		#visualization
 		line1.set_ydata(a)
@@ -74,8 +83,6 @@ def main():
 		plt.pause(0.0001)
 		fig.canvas.flush_events()
 		plt.pause(0.0001)
-
-	axarr[0,0].plot()
 
 if __name__ == '__main__':
 	main()

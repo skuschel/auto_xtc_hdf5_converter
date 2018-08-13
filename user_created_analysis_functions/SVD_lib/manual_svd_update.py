@@ -54,7 +54,7 @@ def svd_rank_one_update(U,s,V,a):
     #####   equations 7   ########
     ##############################
 	
-	V = vstack([V,zeros(len(V))])
+	V = vstack([V,zeros(V.shape[1])])
 	n  = dot(V.transpose(),b)
 	q  = b-dot(V,n)
 	Rb = dot(q.transpose(),q)**0.5
@@ -78,8 +78,8 @@ def svd_rank_one_update(U,s,V,a):
 	eig_vals , eig_vec = eig(K)                       #from text above equation 5 but after equation 4
 													  #sparse matrix will improve performance
 
-	U_P_dot_Up = dot(U_P,eig_vec)
-	V_Q_dot_Vq = dot(inv(eig_vec),V_Q)
+	U_P_dot_Up = dot(U_P,eig_vec)#[:len(a),:len(a)]
+	V_Q_dot_Vq = dot(inv(eig_vec),V_Q)#[:len(a),:]
 
 	return U_P_dot_Up,eig_vals,V_Q_dot_Vq             # udpated_u, updated_s,updated_v
 
