@@ -78,8 +78,13 @@ def svd_rank_one_update(U,s,V,a):
 	eig_vals , eig_vec = eig(K)                       #from text above equation 5 but after equation 4
 													  #sparse matrix will improve performance
 
-	U_P_dot_Up = dot(U_P,eig_vec)#[:len(a),:len(a)]
-	V_Q_dot_Vq = dot(inv(eig_vec),V_Q)#[:len(a),:]
+	new_sort = 	argsort(eig_vals)[::-1]
+	
+	extra_buffer = 100			#tradeoff between memory and stability
+	eig_vals,eig_vec = eig_vals[new_sort][:len(a)+extra_buffer], eig_vec[:,new_sort]	#also need to get rid of this for trunction
+	
+	U_P_dot_Up = dot(U_P,eig_vec)[:len(a)+extra_buffer,:len(a)+extra_buffer]		#truncating improves memory usage but costs
+	V_Q_dot_Vq = dot(inv(eig_vec),V_Q)[:len(a)+extra_buffer,:]		#stability.
 
 	return U_P_dot_Up,eig_vals,V_Q_dot_Vq             # udpated_u, updated_s,updated_v
 

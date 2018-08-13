@@ -54,11 +54,7 @@ def main():
 		a = X[:,-1]
 		
 		U_updated,s_updated,V_updated = svd_rank_one_update(U_updated,s_updated,V_updated,a)
-		new_sort = 	argsort(s_updated)[::-1]
-		U_updated,s_updated,V_updated = U_updated[:,new_sort],s_updated[new_sort],V_updated[new_sort]
-		U_updated,s_updated,V_updated = U_updated[:len(a),:len(a)],s_updated[:len(a)],V_updated[:len(a),:]
-
-
+		
 		update_reconstructed = dot(dot(U_updated,diag(s_updated)),V_updated)
 	
 		update_L2_norm.append(sum((update_reconstructed-X)**2))
