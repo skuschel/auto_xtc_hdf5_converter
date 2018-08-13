@@ -59,6 +59,10 @@ def main():
 	
 		update_L2_norm.append(sum((update_reconstructed-X)**2))
 		
+		if(update_L2_norm>1e5 and i>80):
+			print("recentering  (not accurate description)")
+			U_updated,s_updated,V_updated = svd(update_reconstructed,full_matrices=False)
+
 		#print(str(standard_L2_norm[-1])+", "+str(update_L2_norm[-1]))
 		print("V.shape = "+str(V_updated.shape)+", s_updated.shape = "+str(s_updated.shape)+", U.shape = "+str(U_updated.shape))
 		#print("V.shape = "+str(V.shape)+", s.shape = "+str(s.shape)+", U.shape = "+str(U.shape))
