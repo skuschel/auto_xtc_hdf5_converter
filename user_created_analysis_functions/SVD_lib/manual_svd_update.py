@@ -72,21 +72,21 @@ def svd_rank_one_update(U,s,V,a):
     #####   equation 5   #########
     ##############################
 
-	U_P = vstack([U.transpose(),P]).transpose()       #U_P = [U P] from equation 5
-	V_Q = vstack([V.transpose(),Q]).transpose()       #V_Q = [V Q] from equation 5
+	U_P = vstack([U.transpose(),P]).transpose()    										   #U_P = [U P] from equation 5
+	V_Q = vstack([V.transpose(),Q]).transpose()     									   #V_Q = [V Q] from equation 5
 	
-	eig_vals , eig_vec = eig(K)                       #from text above equation 5 but after equation 4
-													  #sparse matrix will improve performance
+	eig_vals , eig_vec = eig(K)                       									   #from text above equation 5 but after equation 4
+													  									   #sparse matrix will improve performance
 
-	new_sort = 	argsort(eig_vals)[::-1]
+	new_sort = 	argsort(eig_vals)[::-1]				  									   #need to sort in order for negative extra_buffer to work.
 	
-	extra_buffer = 00			#tradeoff between memory and stability
-	eig_vals,eig_vec = eig_vals[new_sort][:len(a)+extra_buffer], eig_vec[:,new_sort]	#also need to get rid of this for trunction
+	extra_buffer = -80																	   #tradeoff between memory and stability
+	eig_vals,eig_vec = eig_vals[new_sort][:len(a)+extra_buffer], eig_vec[:,new_sort]	   #also need to get rid of this for trunction
 	
-	U_P_dot_Up = dot(U_P,eig_vec)[:len(a),:len(a)+extra_buffer]		#truncating improves memory usage but costs
-	V_Q_dot_Vq = dot(inv(eig_vec),V_Q)[:len(a)+extra_buffer,:]		#stability.
+	U_P_dot_Up = dot(U_P,eig_vec)[:len(a),:len(a)+extra_buffer]							   #truncating improves memory usage but costs
+	V_Q_dot_Vq = dot(inv(eig_vec),V_Q)[:len(a)+extra_buffer,:]							   #stability.
 
-	return U_P_dot_Up,eig_vals,V_Q_dot_Vq             # udpated_u, updated_s,updated_v
+	return U_P_dot_Up,eig_vals,V_Q_dot_Vq             									   #udpated_u, updated_s,updated_v
 
 def main():
 
