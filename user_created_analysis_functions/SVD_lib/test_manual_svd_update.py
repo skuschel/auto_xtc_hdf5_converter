@@ -44,14 +44,8 @@ def main():
 
 		X = y_stack[:(i+1)].transpose()
 
-		U,s,V = svd(X,full_matrices=True)
-
-		try:
-			S = zeros([U.shape[0],V.shape[0]])
-			S[:len(s),:len(s)] += diag(s)
-			standard_svd_reconstructed = dot(dot(U,S),V)
-		except:
-			IPython.embed()
+		U,s,V = svd(X,full_matrices=False)
+		standard_svd_reconstructed = dot(dot(U,diag(s)),V)
 
 		standard_L2_norm.append(sum((standard_svd_reconstructed-X)**2))
 
@@ -59,15 +53,19 @@ def main():
 
 		a = X[:,-1]
 		
-		U_updated,s_updated,V_updated = svd_rank_one_update(U_updated,s_updated,V_updated,a)	
+		U_updated,s_updated,V_updated = svd_rank_one_update(U_updated,s_updated,V_updated,a)
+		new_sort = 	argsort(s_updated)[::-1]
+		U_updated,s_updated,V_updated = U_updated[:,new_sort],s_updated[new_sort],V_updated[new_sort]
+		U_updated,s_updated,V_updated = U_updated[:len(a),:len(a)],s_updated[:len(a)],V_updated[:len(a),:]
+
 
 		update_reconstructed = dot(dot(U_updated,diag(s_updated)),V_updated)
 	
 		update_L2_norm.append(sum((update_reconstructed-X)**2))
 		
 		#print(str(standard_L2_norm[-1])+", "+str(update_L2_norm[-1]))
-		#print("V.shape = "+str(V_updated.shape)+", s_updated.shape = "+str(s_updated.shape)+", U.shape = "+str(U_updated.shape))
-		print("V.shape = "+str(V.shape)+", s.shape = "+str(s.shape)+", U.shape = "+str(U.shape))
+		print("V.shape = "+str(V_updated.shape)+", s_updated.shape = "+str(s_updated.shape)+", U.shape = "+str(U_updated.shape))
+		#print("V.shape = "+str(V.shape)+", s.shape = "+str(s.shape)+", U.shape = "+str(U.shape))
 
 		#visualization
 		line1.set_ydata(a)
