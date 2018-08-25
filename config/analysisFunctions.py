@@ -7,7 +7,6 @@ import h5py
 from psmon.plots import MultiPlot,Image,XYPlot
 from psmon import publish
 import time
-import SVDUpdate.py
 
 ######################################################
 #######Using the eigen traces#########################
