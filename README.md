@@ -12,6 +12,7 @@ run the test.sh scripts to execute the example. (some of them require "X forward
 The purpose of the examples in this repository is to allow users to copy one of the test directories, tweak the files, and start analyzing their own data.
 The test.sh scripts found in directories starting with 'xpp' can be run directly.
 Make sure to ssh to a psana machine before trying to run these scripts.
+The examples have a soft link to analysisFunctions.py in the config directory. The soft link can be removed and replaced with the actual file
 ### more detailed descriptions
 
 xpptut15run350 demonstrates how to retrieve 'slow camera' data.
@@ -39,6 +40,16 @@ The 5th column in the name of a function that appears in analysisFunctions.py. T
 The 6th column also tells the auto_xtc_extractor which function to use. But these functions accumulate data and write once after all the events are processed.  This is used for summing up all the images from a detector or reading out 'slow camera' data that only appears every several thousand events.
 
 try commenting out some lines in analysis.cfg or and tweak some functions in analysisFunctions.py.
+
+## Creating own config folders
+
+to create your own config run the command below
+
+../../analysisDetectorConfigGenerator.py -e sxrlr0116 -r 35
+
+where sxrlr0116 and 35 can be replaced with any experiment and run
+
+in a new directory under test.
 
 ## Quick Start
 
