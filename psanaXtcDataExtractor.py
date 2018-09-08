@@ -144,7 +144,7 @@ def renameSummaryKeys(myDict):
 ##################################################################
 ################### main##########################################
 
-def main(myExp, myRun, configFileName,h5FileName,testSample,ttDevice,ttCode,startEvent,finalEvent):
+def main(myExp, myRun, configFileName,h5FileName,testSample,ttDevice,ttCode,startEvent,finalEvent,fast_feedback_nodes):
 	global smldata,	summaryDataDictionary,myDataDictionary,myEnumeratedEvents,eventNumber,thisEvent,myDetectorObjectDictionary,mergedGatheredSummary,myRank,myComm
 
 	#global myExp,myRun
@@ -154,6 +154,10 @@ def main(myExp, myRun, configFileName,h5FileName,testSample,ttDevice,ttCode,star
 	print("entering main function")
 	
 	experimentNameAndRun = "exp=%s:run=%d:smd"%(myExp, myRun)
+	if (fast_feedback_nodes):
+		fast_feedback_directory = ":dir=/reg/d/ffb/%s/%s/xtc:live"%(myExp[:3],myExp)
+		experimentNameAndRun= experimentNameAndRun + fast_feedback_directory
+		print(experimentNameAndRun)
 	#print("loading experiment")
 	#myDataSource = psana.MPIDataSource(experimentNameAndRun+":smd")	#this needs to be merged
 
@@ -288,6 +292,7 @@ if __name__ == '__main__':
 	
 	myParser.add_argument('-s','--start',type=int,help='skips until starting event reached', default=-1)
 	myParser.add_argument('-f','--final',type=int,help='up to final event', default=1e12)
+	myParser.add_argument('-ffb','--fast_feedback_nodes',action='store_true',help='use fast feedback nodes')
 	
 
 	myArguments = myParser.parse_args()
@@ -302,7 +307,8 @@ if __name__ == '__main__':
 		myArguments.ttDevice,
 		myArguments.ttCode,
 		myArguments.start,
-		myArguments.final)
+		myArguments.final,
+		myArguments.fast_feedback_nodes)
 
 	print("finished collecting data")
 	if(myArguments.testSample):
