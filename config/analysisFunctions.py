@@ -7,6 +7,7 @@ import h5py
 from psmon.plots import MultiPlot,Image,XYPlot
 from psmon import publish
 import time
+from mpi4py import MPI 
 
 ######################################################
 #######Using the eigen traces#########################
@@ -392,3 +393,28 @@ def getMonoEncoderValues(detectorObject,thisEvent):
 	if(None != detectorObject[selfName].values(thisEvent)):
 		to_return = detectorObject[selfName].values(thisEvent)
 	return to_return
+
+def plot_acqiris(detectorObject,thisEvent):
+	selfName = detectorObject['self_name']
+	y = detectorObject[selfName](thisEvent)[0][1]
+
+	if(None != y):
+		to_plot = XYPlot(time.time(),"x vs y", arange(len(y)),y)
+		publish.send('my_plot',to_plot)
+
+"""def plot_acqiris_mpi(detectorObject,thisEvent):
+
+	selfName = detectorObject['self_name']
+	y = detectorObject[selfName](thisEvent)[0][1]
+
+	if detectorObject['rank']==0:
+	    runmaster(numClients)
+	else:
+    	md.addarray('img',img)
+        md.small.intensity = intensity
+        if ((nevent)%2 == 0): # send mpi data object to master when desired
+            md.send()
+
+	if(None != y):
+		to_plot = XYPlot(time.time(),"x vs y", arange(len(y)),y)
+		publish.send('my_plot',to_plot)"""
