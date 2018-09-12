@@ -402,19 +402,36 @@ def plot_acqiris(detectorObject,thisEvent):
 		to_plot = XYPlot(time.time(),"x vs y", arange(len(y)),y)
 		publish.send('my_plot',to_plot)
 
-"""def plot_acqiris_mpi(detectorObject,thisEvent):
+def plot_acqiris_mpi(detectorObject,thisEvent):
+
+	nevent = detectorObject['event_number']
+	comm   = detectorObject['myComm']
+	rank   = detectorObject['rank']
 
 	selfName = detectorObject['self_name']
 	y = detectorObject[selfName](thisEvent)[0][1]
 
-	if detectorObject['rank']==0:
-	    runmaster(numClients)
-	else:
-    	md.addarray('img',img)
-        md.small.intensity = intensity
-        if ((nevent)%2 == 0): # send mpi data object to master when desired
-            md.send()
+	
+	
+	all_traces = {}
+	all_traces[rank] = y
 
-	if(None != y):
-		to_plot = XYPlot(time.time(),"x vs y", arange(len(y)),y)
-		publish.send('my_plot',to_plot)"""
+	if(sum(y)>-430):
+		gatheredSummary = comm.gather(y,root=0)
+	else:
+		gatheredSummary = comm.gather(zeros([15000]),root=0)
+
+	if rank==0:
+		for i in gatheredSummary:
+			try:
+				to_plot = XYPlot(time.time(),"x vs y", arange(len(i)),i)
+				publish.send('my_plot',to_plot)
+				print(sum(i))
+			except:
+				pass
+			
+		print(len(gatheredSummary))
+
+
+
+		

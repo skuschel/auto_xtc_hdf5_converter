@@ -210,7 +210,10 @@ def main(myExp, myRun, configFileName,h5FileName,testSample,ttDevice,ttCode,star
 			break
 		if(eventNumber > finalEvent):
 			break
-		
+
+		myDetectorObjectDictionary['event_number']   = eventNumber
+		myDetectorObjectDictionary['myComm']		 = myComm
+
 		for i in myDetectorObjectDictionary['analyzer']:
 			myDetectorObjectDictionary['self_name'] = i
 			myDataDictionary[i] = myDetectorObjectDictionary['analyzer'][i](myDetectorObjectDictionary,thisEvent)
