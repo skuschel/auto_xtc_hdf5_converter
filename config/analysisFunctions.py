@@ -434,4 +434,22 @@ def plot_acqiris_mpi(detectorObject,thisEvent):
 
 
 
-		
+
+def getAndorFVB_detCount(detectorObject,thisEvent):
+	#IPython.embed()
+	selfName = detectorObject['self_name']
+	myImage = detectorObject[selfName].raw(thisEvent)
+	my_dict = {}
+	
+	#IPython.embed()
+	if None == myImage:
+		my_dict['image'] = zeros(2048)*1.0
+		my_dict['photon_count'] = zeros(2048)*1.0
+		#print("None")
+	else:
+		my_dict['image'] = myImage[0]
+		#print(myImage.shape)
+		temp_image = vstack([zeros(2048),vstack([myImage-median(myImage),zeros(2048)])])
+		my_dict['photon_count'] = detectorObject[selfName].photons(thisEvent,nda_calib=temp_image,adu_per_photon=(350-median(myImage)))[1]
+	
+	return my_dict
