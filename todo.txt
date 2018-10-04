@@ -1,20 +1,23 @@
-1) use publicly available xpptut test data to create unit tests
-	a) how to visualize data comparison?
+1)see note 18 below
+import psana
+myDataSource = psana.MPIDataSource("exp=sxrlr0716:run=71")
+my_events =  myDataSource.events()
+evt = next(my_events)
+env = myDataSource.env()
+configs = env.configStore()
+configs.keys()
+andor_config = configs.get(psana.Andor.ConfigV2)
+andor_config.readoutSpeedIndex()
+history
 
-2) make quick start options for publicly available data.  what exactly does this look like?
-	a) make a unique config file for each experiment
 
-3) streamline the config generator.
+
 
 4) have the config generator update as opposed to rewrite existing config file.
 
 5) have config generator save existing configuration before rewriting.
 
-5) streamline intitial passes for attm eigen backgrounds and acqiris eigen decomposition.
 
-6) make acqiris eigen decomposition able to get white reference line.  (the recusrive svd doesn't accurate capture that. pca would capture it, but it wouldn't change positions. 
-	a) potential solution is to do svd on averages of 100 acqiris traces instead of on every trace. this is not elegant since it introduces another arbitrary tuning parameter.
-	b) could mask out regions of svd that only contain noise.
 
 7) make recursive svd parallelizable. I guess it is already. ok, then condense h5 output into a single useful file. merge svd from multiple cores into single core.
 
@@ -30,13 +33,9 @@
 
 13) conditional IPython.embed() that can be turned off once the function is fine tuned.  E.g. for determining the roi of the system
 
-14) added mask to acq eigen maker and made hsd compatible. this is cludge and will break when hsd has two channels
 
-15) need to add mask to acq eigen analysis
 
-16) for svd mask maker, use argsort on averaged waveform
 
-__check__ 17) generic acqiris analyzer was failing for sxrlr0716. need to figure out why. also add option for integration
 
 18) add daq config to summarizier softXRayDataAndControls/myAnalysisTools/reference_notes
 
