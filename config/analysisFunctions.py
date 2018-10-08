@@ -7,7 +7,7 @@ import h5py
 from psmon.plots import MultiPlot,Image,XYPlot
 from psmon import publish
 import time
-from mpi4py import MPI 
+from mpi4py import MPI
 
 ######################################################
 #######Using the eigen traces#########################
@@ -42,21 +42,21 @@ def use_acq_svd_basis(detectorObject, thisEvent):
 		the_wave_forms = detectorObject[selfName](thisEvent)
 	else:
 		the_wave_forms = detectorObject[selfName](thisEvent)[0]
-		
+
 	#x = detectorObject[selfName](thisEvent)[1][0]
 	for i in arange(len(the_wave_forms)):
 		eigen_traces = eigen_traces_h5py["summary/nonMeaningfulCoreNumber0/"+selfName+"/ch"+str(i)+"/norm_eigen_wave_forms"]
 		#eigen_traces = eigen_traces_h5py["summary/nonMeaningfulCoreNumber0/"+selfName+"/ch"+str(i)+"/eigen_wave_forms"]
 		#eigen_traces = array([eigen_traces[j]/sum(eigen_traces[j]**2)**0.5 for j in arange(len(eigen_traces))])	#not efficient. constantly renormalizing. will optimize later
-		
+
 		y = 1.0*the_wave_forms[i]
 		y -= mean(y[config_parameters['offset_mask']])
 		weightings = dot(eigen_traces,y)
 		residuals = y-dot(weightings,eigen_traces)
 		variance = sum(residuals**2)/len(y)
 		#variance = dot(eigen_traces,residuals)**2
-		#approximation in line above comes from eigen_traces is orthogonal matrix, 
-		#so dot (eigen_traces.transpose(),eigen_traces) is diagonal. 
+		#approximation in line above comes from eigen_traces is orthogonal matrix,
+		#so dot (eigen_traces.transpose(),eigen_traces) is diagonal.
 		#missing something with number of points and degrees of freedom
 		my_results["ch"+str(i)] = {"weightings":weightings,"variance":variance}
 
@@ -73,12 +73,12 @@ def svd_update(eigen_system,new_vector,config_parameters):
 	try:
 		reconstructed_system = dot(eigen_system['eigen_weightings'], eigen_system['eigen_wave_forms'])
 		reconstructed_system = vstack([reconstructed_system,new_vector])
-		
+
 		roi_mask = zeros(reconstructed_system.shape).astype(bool)
 		roi_mask[:,roi_mask_start:roi_mask_end]=True
 		masked_reconstructed_system = reconstructed_system[roi_mask]
 		masked_reconstructed_system.shape = (len(roi_mask),roi_mask_start-roi_mask_end)
-		
+
 		#singular_values,svd_lsv = eig(dot(reconstructed_system,reconstructed_system.transpose()))
 		singular_values,svd_lsv = eig(dot(masked_reconstructed_system,masked_reconstructed_system.transpose()))
 
@@ -88,7 +88,7 @@ def svd_update(eigen_system,new_vector,config_parameters):
 		norm_eigen_vectors = real(array([new_eigen_vectors[i]/sum(new_eigen_vectors[i]**2)**0.5 for i in arange(len(new_eigen_vectors))]))
 
 		eigen_system = {'eigen_weightings':new_weightings[:config_parameters["eigen_basis_size"],:config_parameters["eigen_basis_size"]] ,'eigen_wave_forms':new_eigen_vectors,'norm_eigen_wave_forms':norm_eigen_vectors}
-	
+
 
 	except TypeError:
 		if ((None is new_vector) and (len(eigen_system['eigen_weightings'])>1)):
@@ -102,7 +102,7 @@ def svd_update(eigen_system,new_vector,config_parameters):
 		if (1==len(eigen_system['eigen_weightings'])):
 			eigen_system['eigen_weightings'] = array([[1,0],[0,1]])
 			eigen_system['eigen_wave_forms'] = vstack([eigen_system['eigen_wave_forms'],new_vector])
-			eigen_system['norm_eigen_wave_forms'] = eigen_system['eigen_wave_forms']		
+			eigen_system['norm_eigen_wave_forms'] = eigen_system['eigen_wave_forms']
 
 	return eigen_system
 
@@ -111,7 +111,7 @@ def make_acq_svd_basis(detectorObject,thisEvent,previousProcessing):
 	config_parameters = {"thresh_hold":0.05,"waveform_mask":arange(1200,1230),"eigen_basis_size":25,"offset_mask":arange(300)}
 
 	eigen_system = {}
-	
+
 	##############################
 	#### initializing arrays #####
 	##############################
@@ -129,8 +129,8 @@ def make_acq_svd_basis(detectorObject,thisEvent,previousProcessing):
 			eigen_system["ch"+str(i)] = previousProcessing["ch"+str(i)]
 		except (KeyError,TypeError) as e:
 			try:
-				y =  1.0*the_wave_forms[i]			
-				y -= mean(y[config_parameters['offset_mask']])			
+				y =  1.0*the_wave_forms[i]
+				y -= mean(y[config_parameters['offset_mask']])
 				eigen_system["ch"+str(i)]= {'eigen_wave_forms':y,'eigen_weightings':[1],'norm_eigen_wave_forms':[1]}
 			except (KeyError,TypeError) as e:
 				eigen_system["ch"+str(i)] = {'eigen_wave_forms':None,'eigen_weightings':None,'norm_eigen_wave_forms':None}
@@ -145,7 +145,7 @@ def make_acq_svd_basis(detectorObject,thisEvent,previousProcessing):
 		y -= mean(y[config_parameters['offset_mask']])
 		start_time = time.time()
 		new_eigen_system["ch"+str(i)] = svd_update(eigen_system["ch"+str(i)],y,config_parameters)
-	
+
 	#print(time.time() - start_time)
 	#for j in eigen_system["ch"+str(i)]:
 	#	print(str(j)+", "+str(eigen_system["ch"+str(i)][j].shape))
@@ -182,7 +182,7 @@ def get_projection(detectorObject,thisEvent):
 	selfName = detectorObject['self_name']
 	myImage = detectorObject[selfName].raw(thisEvent)
 
-	
+
 
 	if None == myImage:
 		return (zeros(1024))
@@ -199,9 +199,9 @@ def myZeroReturn(detectorObject,thisEvent,previousProcessing):
 def getTimeToolData(detectorObject,thisEvent):
 	selfName = detectorObject['self_name']
 	ttData = detectorObject[selfName].process(thisEvent)
-	myDict = {}	
+	myDict = {}
 	if(ttData is None):
-		
+
 		myDict['amplitude'] = -99999.0
 		myDict['pixelTime'] = -99999.0
 		myDict['positionFWHM'] = -99999.0
@@ -222,7 +222,7 @@ def getPeak(detectorObject,thisEvent):
 	if(None is detectorObject[selfName](thisEvent)):
 		fit_results = {'amplitude':popt[2],'uncertainty_cov':pcov[2,2]}
 		return fit_results
-		
+
 
 	myWaveForm = -detectorObject[selfName](thisEvent)[0][0]
 
@@ -232,12 +232,12 @@ def getPeak(detectorObject,thisEvent):
 	#myFit = polyfit(x, myWaveForm[7500:10000],3)
 	#p = poly1d(myFit)
 	#myMax = max(p(x))
-	#return myMax	
+	#return myMax
 
-	
+
 	try:
 		popt,pcov = curve_fit(peakFunction,x,myWaveForm[7500:10000])
-		
+
 		fit_results = {'amplitude':popt[2],'uncertainty_cov':pcov[2,2]}
 
 	except RuntimeError:
@@ -259,12 +259,12 @@ def getWaveForm(detectorObject,thisEvent):
 
 	if (None not in [detectorObject[selfName](thisEvent)[0][0]]):
 		return detectorObject[selfName](thisEvent)[0][0]
-	else:	
+	else:
 		return 0
-	
+
 def get(detectorObject,thisEvent):
 	selfName = detectorObject['self_name']
-	
+
 	if (None not in [detectorObject[selfName](thisEvent)]):
 		return detectorObject[selfName](thisEvent)
 	else:
@@ -282,7 +282,7 @@ def getGMD(detectorObject,thisEvent):
 	selfName = detectorObject['self_name']
 
 	temp = detectorObject[selfName].get(thisEvent)
-	
+
 	my_dict = {"milliJoulesPerPulse":-99999.0,"milliJoulesAverage":-99999.0,"relativeEnergyPerPulse":999999.0}
 
 	if (None not in [temp]):
@@ -295,7 +295,7 @@ def getGMD(detectorObject,thisEvent):
 
 #for slow cameras that would crash psana if written every event cause of back filling with zeros
 def slowCameraImageSummarizer(detectorObject,thisEvent,previousProcessing):
-		
+
 	selfName = detectorObject['self_name']
 	#return detectorObject.image(thisEvent)
 	tempImage = detectorObject[selfName].image(thisEvent)
@@ -311,10 +311,10 @@ def slowCameraImageSummarizer(detectorObject,thisEvent,previousProcessing):
 		print("got image")
 		myEventId = thisEvent.get(psana.EventId)
 		myTime = myEventId.time()[0]
-		myDict["sec"+str(myTime)] = tempImage		
-		
+		myDict["sec"+str(myTime)] = tempImage
+
 		previousProcessing.update(myDict)
-	
+
 	return previousProcessing
 
 def getDLS(detectorObject, thisEvent):
@@ -339,7 +339,7 @@ def generic_acqiris_analyzer(detectorObject,thisEvent):
 	if(None is detectorObject[selfName](thisEvent)):
 		#fit_results = {'amplitude':popt[2],'uncertainty_cov':pcov[2,2]}
 		return None
-		
+
 	x = detectorObject[selfName](thisEvent)[1][0]
 	for i in arange(len(detectorObject[selfName](thisEvent)[0])):
 
@@ -359,7 +359,7 @@ def generic_acqiris_analyzer(detectorObject,thisEvent):
 			fit_results['ch'+str(i)]['area']=sum(y_small)
 
 			popt,pcov = curve_fit(peakFunction,x_small,y_small,p0=[0.0,initial_peak,initial_height])
-		
+
 			fit_results['ch'+str(i)]["position"]      = popt[1]
 			fit_results['ch'+str(i)]['amplitude']     = popt[2]
 			fit_results['ch'+str(i)]['position_var']  = pcov[1,1]
@@ -371,21 +371,23 @@ def generic_acqiris_analyzer(detectorObject,thisEvent):
 
 	return fit_results
 
+
 def getAndorFVBImage(detectorObject,thisEvent):
-	
+
 	selfName = detectorObject['self_name']
 	myImage = detectorObject[selfName].raw(thisEvent)
 	my_dict = {}
-	
-	
+
+
 	if None == myImage:
 		my_dict['image'] = zeros(2048)
 		#print("None")
 	else:
 		my_dict['image'] = myImage[0]
 		#print(myImage.shape)
-	
+
 	return my_dict
+
 
 def getMonoEncoderValues(detectorObject,thisEvent):
 	selfName = detectorObject['self_name']
@@ -393,6 +395,26 @@ def getMonoEncoderValues(detectorObject,thisEvent):
 	if(None != detectorObject[selfName].values(thisEvent)):
 		to_return = detectorObject[selfName].values(thisEvent)
 	return to_return
+
+
+def miniTOF(detobj, thisEvent):
+	selfName = detobj['self_name']
+	minitof_volts_raw = detobj[selfName].waveform(thisEvent)
+	if minitof_volts_raw is None:
+		return None
+	minitof_volts = minitof_volts_raw[2]  # channel 3
+	#iTOF_yield = np.mean(minitof_volts[6700:8000]) - np.mean(minitof_volts[-1000:])
+	bg = np.mean(minitof_volts[-1000:])
+	return dict(volts=minitof_volts-bg, bg=bg)
+
+
+def pnccd_image(detobj, thisEvent):
+	selfName = detobj['self_name']
+	image = detobj[selfName].image(thisEvent)
+	if image is None:
+		return None
+	return dict(image=image)
+
 
 def plot_acqiris(detectorObject,thisEvent):
 	selfName = detectorObject['self_name']
@@ -411,8 +433,8 @@ def plot_acqiris_mpi(detectorObject,thisEvent):
 	selfName = detectorObject['self_name']
 	y = detectorObject[selfName](thisEvent)[0][1]
 
-	
-	
+
+
 	all_traces = {}
 	all_traces[rank] = y
 
@@ -429,7 +451,7 @@ def plot_acqiris_mpi(detectorObject,thisEvent):
 				print(sum(i))
 			except:
 				pass
-			
+
 		print(len(gatheredSummary))
 
 
@@ -440,7 +462,7 @@ def getAndorFVB_detCount(detectorObject,thisEvent):
 	selfName = detectorObject['self_name']
 	myImage = detectorObject[selfName].raw(thisEvent)
 	my_dict = {}
-	
+
 	#IPython.embed()
 	if None == myImage:
 		my_dict['image'] = zeros(2048)*1.0
@@ -451,5 +473,5 @@ def getAndorFVB_detCount(detectorObject,thisEvent):
 		#print(myImage.shape)
 		temp_image = vstack([zeros(2048),vstack([myImage-median(myImage),zeros(2048)])])
 		my_dict['photon_count'] = detectorObject[selfName].photons(thisEvent,nda_calib=temp_image,adu_per_photon=(350-median(myImage)))[1]
-	
+
 	return my_dict
