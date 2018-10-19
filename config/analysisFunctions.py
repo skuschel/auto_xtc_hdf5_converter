@@ -332,7 +332,7 @@ def peakFunction(x,a,x0,offset):
 
 def generic_acqiris_analyzer(detectorObject,thisEvent):
 
-	peak_width = 4	############################## tunable parameter. needs to be different for each trace.
+	peak_width = 12	############################## tunable parameter. needs to be different for each trace.
 	selfName = detectorObject['self_name']
 	fit_results = {}
 
@@ -343,7 +343,7 @@ def generic_acqiris_analyzer(detectorObject,thisEvent):
 	x = detectorObject[selfName](thisEvent)[1][0]
 	for i in arange(len(detectorObject[selfName](thisEvent)[0])):
 
-		y = detectorObject[selfName](thisEvent)[0][i]
+		y = abs(detectorObject[selfName](thisEvent)[0][i])
 
 
 		smoothed_wave = convolve(y,[1,1,1,1,1,1],mode='same')
