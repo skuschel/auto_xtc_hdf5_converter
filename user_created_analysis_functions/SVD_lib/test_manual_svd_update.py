@@ -4,7 +4,7 @@ from matplotlib import pyplot as plt
 from manual_svd_update import svd_rank_one_update
 import IPython
 
-MAKE_PLOT = True
+MAKE_PLOT = False
 max_matrix_size = 10
 
 def main():
@@ -17,7 +17,7 @@ def main():
 		x = arange (0,10,0.1)
 		y_stack = y(x,1.0,1.0,3,0)
 		for i in arange(1000):
-			y_stack = vstack([y_stack,y(x,1.0*(0.9+rand()/5),1.0*(0.9+rand()/5),3*(0.9+rand()/5),0)])
+			y_stack = vstack([y_stack,y(x,1.0*(1.75+rand()/5),1.0*(0.9+rand()/5),3*(0.9+rand()/5),0)])
 
 		initial_stack_size = 5
 		X = y_stack[:initial_stack_size].transpose()	
@@ -100,6 +100,10 @@ def main():
 				plt.pause(0.0001)
 
 	except (KeyboardInterrupt,ValueError) as e:
+		x =(around(rand(3)*X.shape[1]))
+		plot(update_reconstructed[:,x.astype(int)])
+		plot(X[:,x.astype(int)],'o')  
+		show()
 		IPython.embed()
 if __name__ == '__main__':
 	main()
