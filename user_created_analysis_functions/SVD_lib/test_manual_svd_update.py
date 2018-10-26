@@ -4,6 +4,9 @@ from matplotlib import pyplot as plt
 from manual_svd_update import svd_rank_one_update
 import IPython
 
+MAKE_PLOT = True
+max_matrix_size = 10
+
 def main():
 	try:
 		#making test data
@@ -24,16 +27,18 @@ def main():
 
 		U_updated,s_updated,V_updated = svd(X,full_matrices = False)
 
-		plt.ion()
-		#fig = plt.figure()
-		#ax = fig.add_subplot(111)
-		fig, ax_list = plt.subplots(1, 2)
-		line1, = ax_list[0].plot(x,X[:,-1])
-		line2, = ax_list[0].plot(x,X[:,-1],'o')
-		line3, = ax_list[1].plot(arange(2),arange(2))
-		line4, = ax_list[1].plot(arange(2),arange(2))
+		if(MAKE_PLOT):
 
-		plt.pause(0.0001)
+			plt.ion()
+			#fig = plt.figure()
+			#ax = fig.add_subplot(111)
+			fig, ax_list = plt.subplots(1, 2)
+			line1, = ax_list[0].plot(x,X[:,-1])
+			line2, = ax_list[0].plot(x,X[:,-1],'o')
+			line3, = ax_list[1].plot(arange(2),arange(2))
+			line4, = ax_list[1].plot(arange(2),arange(2))
+
+			plt.pause(0.0001)
 	
 		update_L2_norm = []
 		standard_L2_norm = []
@@ -52,8 +57,15 @@ def main():
 			#update SVD under test
 
 			a = X[:,-1]
+
 		
 			U_updated,s_updated,V_updated = svd_rank_one_update(U_updated,s_updated,V_updated,a)
+
+			#only use thin amount of updated SVD
+
+			U_updated = U_updated[:,:max_matrix_size]
+			s_updated = s_updated[:max_matrix_size]
+			V_updated = V_updated[:max_matrix_size]
 		
 			update_reconstructed = dot(dot(U_updated,diag(s_updated)),V_updated)
 	
@@ -72,21 +84,22 @@ def main():
 			#print("V.shape = "+str(V.shape)+", s.shape = "+str(s.shape)+", U.shape = "+str(U.shape))
 
 			#visualization
-			line1.set_ydata(a)
-			line2.set_ydata(update_reconstructed[:,-1])
-			line3.set_xdata(arange(len(standard_L2_norm)))
-			line4.set_xdata(arange(len(update_L2_norm)))
-			line3.set_ydata(standard_L2_norm)
-			line4.set_ydata(update_L2_norm)
-			ax_list[1].set_xlim(0,len(standard_L2_norm))
-			ax_list[1].set_ylim(0,max(update_L2_norm))
-			plt.pause(0.0001)
-			fig.canvas.draw()
-			plt.pause(0.0001)
-			fig.canvas.flush_events()
-			plt.pause(0.0001)
+			if(MAKE_PLOT):
+				line1.set_ydata(a)
+				line2.set_ydata(update_reconstructed[:,-1])
+				line3.set_xdata(arange(len(standard_L2_norm)))
+				line4.set_xdata(arange(len(update_L2_norm)))
+				line3.set_ydata(standard_L2_norm)
+				line4.set_ydata(update_L2_norm)
+				ax_list[1].set_xlim(0,len(standard_L2_norm))
+				ax_list[1].set_ylim(0,max(update_L2_norm))
+				plt.pause(0.0001)
+				fig.canvas.draw()
+				plt.pause(0.0001)
+				fig.canvas.flush_events()
+				plt.pause(0.0001)
 
-	except KeyboardInterrupt:
+	except (KeyboardInterrupt,ValueError) as e:
 		IPython.embed()
 if __name__ == '__main__':
 	main()

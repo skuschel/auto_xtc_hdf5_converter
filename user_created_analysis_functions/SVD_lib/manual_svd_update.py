@@ -35,61 +35,58 @@ DEBUG = False
 
 def svd_rank_one_update(U,s,V,a):
 
-	##############################
-    #####   Table 1   ############
-    ##############################
- 
-	b = zeros(len(s)+1)
-	b[-1] = 1
+	try:
 
-	##############################
-    #####   equations 6   ########
-    ##############################
-	m  = dot(U.transpose(),a)			
-	p  = a-dot(U,m)						
-	Ra = dot(p.transpose(),p)**0.5
-	P  = p/dot(p.transpose(),p)**0.5
+		##############################
+		#####   Table 1   ############
+		##############################
+	 
+		b = zeros(len(s)+1)
+		b[-1] = 1
 
-	##############################
-    #####   equations 7   ########
-    ##############################
+		##############################
+		#####   equations 6   ########
+		##############################
+		m  = dot(U.transpose(),a)			
+		p  = a-dot(U,m)						
+		Ra = dot(p.transpose(),p)**0.5
+		P  = p/dot(p.transpose(),p)**0.5
+
+		##############################
+		#####   equations 7   ########
+		##############################
 	
-	V = vstack([V,zeros(V.shape[1])])
-	n  = dot(V.transpose(),b)
-	q  = b-dot(V,n)
-	Rb = dot(q.transpose(),q)**0.5
-	Q  = q/Rb
+		V = vstack([V,zeros(V.shape[1])])
+		n  = dot(V.transpose(),b)
+		q  = b-dot(V,n)
+		Rb = dot(q.transpose(),q)**0.5
+		Q  = q/Rb
 
-	##############################
-    #####   equation 9   #########
-    ##############################
-	K          = diag(zeros(len(s)+1))
-	K[:-1,-1]  = m
-	K[:-1,:-1] = diag(s)
-	K[-1,-1]   = Ra
+		##############################
+		#####   equation 9   #########
+		##############################
+		K          = diag(zeros(len(s)+1))
+		K[:-1,-1]  = m
+		K[:-1,:-1] = diag(s)
+		K[-1,-1]   = Ra
 
-	##############################
-    #####   equation 5   #########
-    ##############################
+		##############################
+		#####   equation 5   #########
+		##############################
 
-	U_P = vstack([U.transpose(),P]).transpose()    										   #U_P = [U P] from equation 5
-	V_Q = vstack([V.transpose(),Q]).transpose()     									   #V_Q = [V Q] from equation 5
+		U_P = vstack([U.transpose(),P]).transpose()       #U_P = [U P] from equation 5
+		V_Q = vstack([V.transpose(),Q]).transpose()       #V_Q = [V Q] from equation 5
 	
-	eig_vals , eig_vec = eig(K)                       									   #from text above equation 5 but after equation 4
-													  									   #sparse matrix will improve performance
+		eig_vals , eig_vec = eig(K)                       #from text above equation 5 but after equation 4
+														  #sparse matrix will improve performance
 
-	new_sort = 	argsort(eig_vals)[::-1]				  									   #need to sort in order for negative extra_buffer to work.
-	
-	extra_buffer = -80																	   #tradeoff between memory and stability
-	eig_vals,eig_vec = eig_vals[new_sort][:len(a)+extra_buffer], eig_vec[:,new_sort]	   #also need to get rid of this for trunction
-	
-	U_P_dot_Up = dot(U_P,eig_vec)[:len(a),:len(a)+extra_buffer]							   #truncating improves memory usage but costs
-	V_Q_dot_Vq = dot(inv(eig_vec),V_Q)[:len(a)+extra_buffer,:]							   #stability.
+		U_P_dot_Up = dot(U_P,eig_vec)
+		V_Q_dot_Vq = dot(inv(eig_vec),V_Q)
 
-	#Use implementation described by equation 11
-	#i.e. stop updating U and instead keep track of U_prime
+		return U_P_dot_Up,eig_vals,V_Q_dot_Vq             # udpated_u, updated_s,updated_v
 
-	return U_P_dot_Up,eig_vals,V_Q_dot_Vq             									   # udpated_u, updated_s,updated_v
+	except:
+		IPython.embed()
 
 def main():
 
@@ -132,4 +129,3 @@ def main():
 
 if __name__ == '__main__':
 	main()
-
