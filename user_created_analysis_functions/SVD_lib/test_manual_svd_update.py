@@ -6,6 +6,8 @@ import IPython
 
 MAKE_PLOT = False
 max_matrix_size = 10
+y_stack_size = 500
+X_stack_size = 300
 
 def main():
 	try:
@@ -16,11 +18,11 @@ def main():
 
 		x = arange (0,10,0.1)
 		y_stack = y(x,1.0,1.0,3,0)
-		for i in arange(1000):
-			y_stack = vstack([y_stack,y(x,1.0*(1.75+rand()/5),1.0*(0.9+rand()/5),3*(0.9+rand()/5),0)])
+		for i in arange(y_stack_size):
+			y_stack = vstack([y_stack,y(x,1.0*(1.0+rand()/2),1.0*(0.9+rand()/5),3*(0.9+rand()/5),2*pi*rand())])
 
-		initial_stack_size = 5
-		X = y_stack[:initial_stack_size].transpose()	
+
+		X = y_stack[:X_stack_size].transpose()	
 
 		#initialize svd strategies for comparison
 		U,s,V = svd(X)
@@ -43,16 +45,16 @@ def main():
 		update_L2_norm = []
 		standard_L2_norm = []
 
-		for i in arange(initial_stack_size,y_stack.shape[0]):
+		for i in arange(X_stack_size,y_stack_size):
 
 			#standard SVD for baseline comparison
 
 			X = y_stack[:(i+1)].transpose()
+			if(MAKE_PLOT):
+				U,s,V = svd(X,full_matrices=False)
+				standard_svd_reconstructed = dot(dot(U,diag(s)),V)
 
-			U,s,V = svd(X,full_matrices=False)
-			standard_svd_reconstructed = dot(dot(U,diag(s)),V)
-
-			standard_L2_norm.append(sum((standard_svd_reconstructed-X)**2))
+				standard_L2_norm.append(sum((standard_svd_reconstructed-X)**2))
 
 			#update SVD under test
 
@@ -71,11 +73,11 @@ def main():
 	
 			update_L2_norm.append(sum((update_reconstructed-X)**2))
 		
-			if(update_L2_norm>1e500 and i>20):
-				print("recentering  (not accurate description)")
+			#if(update_L2_norm>1e500 and i>20):
+			#	print("recentering  (not accurate description)")
 				#U_temp, s_temp,V_temp = svd(update_reconstructed,full_matrices=False)				
 				#IPython.embed()
-				U_updated,s_updated,V_updated = svd(update_reconstructed,full_matrices=False)	#this works, and it's only doing it on the reconstructed, not on the full. 
+			#	U_updated,s_updated,V_updated = svd(update_reconstructed,full_matrices=False)	#this works, and it's only doing it on the reconstructed, not on the full. 
 																								#but doing it too frequently. Still, this is more memory efficient.
 																								#not really cause the reconstructed takes up just as much mem as the original
 
@@ -100,10 +102,13 @@ def main():
 				plt.pause(0.0001)
 
 	except (KeyboardInterrupt,ValueError) as e:
-		x =(around(rand(3)*X.shape[1]))
-		plot(update_reconstructed[:,x.astype(int)])
-		plot(X[:,x.astype(int)],'o')  
-		show()
 		IPython.embed()
+
+	x =((y_stack_size-X_stack_size)+(around((X_stack_size)*rand(3))))
+	plot(update_reconstructed[:,x.astype(int)])
+	plot(X[:,x.astype(int)],'o')  
+	show()
+
+	IPython.embed()
 if __name__ == '__main__':
 	main()
