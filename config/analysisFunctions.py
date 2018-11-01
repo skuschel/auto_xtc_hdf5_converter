@@ -371,6 +371,40 @@ def generic_acqiris_analyzer(detectorObject,thisEvent):
 
 	return fit_results
 
+def get_raw_acq(detectorObject,thisEvent):
+	
+
+	mask_dict = {}	
+	mask_dict['hsd',1] = [2000,2750]
+	mask_dict['hsd',2] = [2000,2750]
+	mask_dict['hsd',3] = [2000,2750]
+	mask_dict['hsd',4] = [2000,2750]
+
+	mask_dict['acq02',1] = [750,2000]
+	mask_dict['acq02',2] = [750,2000]
+	mask_dict['acq02',3] = [750,2000]
+	mask_dict['acq02',4] = [750,2000]
+
+	selfName = detectorObject['self_name']
+	my_dict = {}
+
+	if(None is detectorObject[selfName](thisEvent)):
+		#fit_results = {'amplitude':popt[2],'uncertainty_cov':pcov[2,2]}
+		return None
+
+	if("hsd" in selfName):		#this is temp cludge that will break when hsd is set to two channels
+			the_wave_forms = detectorObject[selfName](thisEvent)
+	else:
+			the_wave_forms = detectorObject[selfName](thisEvent)[0]
+	
+	
+	for i in arange(0,len(the_wave_forms)):
+
+		y = the_wave_forms[i]
+
+		my_dict['ch'+str(i+1)] = y[mask_dict[selfName,i+1][0]:mask_dict[selfName,i+1][1] ]
+
+	return my_dict
 
 def getAndorFVBImage(detectorObject,thisEvent):
 

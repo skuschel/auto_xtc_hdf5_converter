@@ -1,0 +1,11 @@
+#how to go about testing
+
+#1) write unit tests for analysis functions
+	a) need to simulate psana data object structure... no,
+	
+#2) have testing pipe line that goes through script to generate acq eigen analysis.
+#	a) this script will change because it's not yet stream lined
+	b) need to write reconstruction script (in other test files in stream lined analysis functions)
+		i)this will require comparing good SVD reconstructions with bad SVD reconstructions
+
+#3) 
