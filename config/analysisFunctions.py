@@ -395,6 +395,15 @@ def pnccd_image(detobj, thisEvent):
 	return dict(image=image)
 
 
+def opal_image(detobj, thisEvent):
+	selfName = detobj['self_name']
+	image = detobj[selfName].raw(thisEvent)
+	if image is None:
+		return None
+	return dict(image=image)
+
+
+
 
 
 
