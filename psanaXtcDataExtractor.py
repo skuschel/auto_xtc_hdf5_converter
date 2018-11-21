@@ -1,4 +1,4 @@
-#!/reg/g/psdm/sw/conda/inst/miniconda2-prod-rhel7/envs/ana-1.3.9/bin/python
+#!/reg/g/psdm/sw/conda/inst/miniconda2-prod-rhel7/envs/ana-1.3.58/bin/python
 
 #--------------------------------------------------------------------------
 # File and Version Information:
@@ -51,11 +51,12 @@ import IPython
 #depending whether MPIDataSouce or plain data source is used
 ttAnalyze = None
 
-def makeDataSourceAndSmallData(experimentNameAndRun,h5FileName,ttDevice,ttCode):
+def makeDataSourceAndSmallData(experimentNameAndRun,h5FileName,ttDevice,ttCode,shared_memory):
 	global ttAnalyze
 	smldata = "None"
 	small_hdf5_dir = "hdf5"
 	os.system("mkdir "+small_hdf5_dir)
+
 	if(ttDevice is not None ):
 
 		print("setting up time tool.") 
@@ -74,11 +75,15 @@ def makeDataSourceAndSmallData(experimentNameAndRun,h5FileName,ttDevice,ttCode):
 			smldata = myDataSource.small_data(small_hdf5_dir+"/"+h5FileName, gather_interval=10)
 	else:
 		print("loading mpi data source")
-		myDataSource = psana.MPIDataSource(experimentNameAndRun)
+		if(shared_memory):
+			myDataSource = psana.DataSource('shmem=psana.0:stop=no')
+		else:
+			myDataSource = psana.MPIDataSource(experimentNameAndRun)
 
 		print("defining small data. hook in place ")
 		if(h5FileName!="None"):
 			smldata = myDataSource.small_data(small_hdf5_dir+"/"+h5FileName, gather_interval=10)
+
 
 
 	return (myDataSource,smldata)
@@ -144,8 +149,12 @@ def renameSummaryKeys(myDict):
 ##################################################################
 ################### main##########################################
 
-def main(myExp, myRun, configFileName,h5FileName,testSample,ttDevice,ttCode,startEvent,finalEvent):
+def main(myExp, myRun, configFileName,h5FileName,testSample,ttDevice,ttCode,startEvent, finalEvent,fast_feedback_nodes,shared_memory):
 	global smldata,	summaryDataDictionary,myDataDictionary,myEnumeratedEvents,eventNumber,thisEvent,myDetectorObjectDictionary,mergedGatheredSummary,myRank,myComm
+
+	
+	if(shared_memory):
+		h5FileName = "None"
 
 	#global myExp,myRun
 	print ("exp = "+str(myExp))
@@ -154,6 +163,10 @@ def main(myExp, myRun, configFileName,h5FileName,testSample,ttDevice,ttCode,star
 	print("entering main function")
 	
 	experimentNameAndRun = "exp=%s:run=%d:smd"%(myExp, myRun)
+	if (fast_feedback_nodes):
+		fast_feedback_directory = ":dir=/reg/d/ffb/%s/%s/xtc:live"%(myExp[:3],myExp)
+		experimentNameAndRun= experimentNameAndRun + fast_feedback_directory
+		print(experimentNameAndRun)
 	#print("loading experiment")
 	#myDataSource = psana.MPIDataSource(experimentNameAndRun+":smd")	#this needs to be merged
 
@@ -167,7 +180,7 @@ def main(myExp, myRun, configFileName,h5FileName,testSample,ttDevice,ttCode,star
 		#if(myRank==0):		#may still not work if race conditions
 			#os.system("rm "+h5FileName)
 
-	myDataSource, smldata = makeDataSourceAndSmallData(experimentNameAndRun,h5FileName,ttDevice,ttCode)
+	myDataSource, smldata = makeDataSourceAndSmallData(experimentNameAndRun,h5FileName,ttDevice,ttCode,shared_memory)
 
 	print("loading detector object dictionary")
 	myDetectorObjectDictionary = generateDetectorDictionary(configFileName)
@@ -197,7 +210,10 @@ def main(myExp, myRun, configFileName,h5FileName,testSample,ttDevice,ttCode,star
 			break
 		if(eventNumber > finalEvent):
 			break
-		
+
+		myDetectorObjectDictionary['event_number']   = eventNumber
+		myDetectorObjectDictionary['myComm']		 = myComm
+
 		for i in myDetectorObjectDictionary['analyzer']:
 			myDetectorObjectDictionary['self_name'] = i
 			myDataDictionary[i] = myDetectorObjectDictionary['analyzer'][i](myDetectorObjectDictionary,thisEvent)
@@ -288,6 +304,8 @@ if __name__ == '__main__':
 	
 	myParser.add_argument('-s','--start',type=int,help='skips until starting event reached', default=-1)
 	myParser.add_argument('-f','--final',type=int,help='up to final event', default=1e12)
+	myParser.add_argument('-ffb','--fast_feedback_nodes',action='store_true',help='use fast feedback nodes')
+	myParser.add_argument('-shmem','--shared_memory',action='store_true',help='use shared memory')
 	
 
 	myArguments = myParser.parse_args()
@@ -302,7 +320,9 @@ if __name__ == '__main__':
 		myArguments.ttDevice,
 		myArguments.ttCode,
 		myArguments.start,
-		myArguments.final)
+		myArguments.final,
+		myArguments.fast_feedback_nodes,
+		myArguments.shared_memory)
 
 	print("finished collecting data")
 	if(myArguments.testSample):
