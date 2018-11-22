@@ -4,6 +4,7 @@ import IPython
 from scipy.optimize import curve_fit
 from scipy.signal import savgol_filter
 import h5py
+import numpy as np
 from psmon.plots import MultiPlot,Image,XYPlot
 from psmon import publish
 import time
@@ -407,11 +408,12 @@ def get_raw_acq(detectorObject,thisEvent):
 	return my_dict
 
 def getAndorFVBImage(detectorObject,thisEvent):
-
+	'''
+	get the andor profile, if camera was used in Full Vertical Binning mode.
+	'''
 	selfName = detectorObject['self_name']
 	myImage = detectorObject[selfName].raw(thisEvent)
 	my_dict = {}
-
 
 	if None == myImage:
 		my_dict['image'] = zeros(2048)
@@ -419,7 +421,6 @@ def getAndorFVBImage(detectorObject,thisEvent):
 	else:
 		my_dict['image'] = myImage[0]
 		#print(myImage.shape)
-
 	return my_dict
 
 
@@ -456,6 +457,50 @@ def opal_image(detobj, thisEvent):
 	if image is None:
 		return None
 	return dict(image=image)
+
+
+roidict1 = dict()
+roidict1[6] = slice(480, 580)
+roidict2 = dict()
+roidict2[6] = slice(630, 730)
+for i in range(1, 200):
+	roidict1[i] = roidict1[6]
+	roidict2[i] = roidict2[6]
+
+def opal_roi1(detobj, thisEvent):
+	return _opal_roi(detobj, thisEvent, roidict1)
+
+def opal_profile1(detobj, thisEvent):
+	img = opal_roi1(detobj, thisEvent)
+	if img is None:
+		return None
+	return np.mean(img, axis=0)
+
+def opal_profile2(detobj, thisEvent):
+	img = opal_roi2(detobj, thisEvent)
+	if img is None:
+		return None
+	return np.mean(img, axis=0)
+
+def opal_roi2(detobj, thisEvent):
+	return _opal_roi(detobj, thisEvent, roidict2)
+
+def _opal_roi(detobj, thisEvent, roidict):
+	'''
+	Returns only an ROI for the specified image.
+	Cannot be used as analysis function.
+	Use opal_roi1 and opal_roi2 instead.
+	'''
+	selfName = detobj['self_name']
+	image = detobj[selfName].raw(thisEvent)
+	if image is None:
+		return None
+	run = thisEvent.run()
+	if run not in roidict:
+		return None
+	roi = roidict[run]
+	return np.asarray(image)[roi]
+
 
 
 def plot_acqiris(detectorObject,thisEvent):
