@@ -419,7 +419,7 @@ def getAndorFVBImage(detectorObject,thisEvent):
 		my_dict['image'] = zeros(2048)
 		#print("None")
 	else:
-		my_dict['image'] = myImage[0]
+		my_dict['image'] = np.sum(myImage, axis=0)
 		#print(myImage.shape)
 	return my_dict
 
