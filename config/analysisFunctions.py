@@ -461,11 +461,23 @@ def opal_image(detobj, thisEvent):
 
 roidict1 = dict()
 roidict1[6] = slice(480, 580)
+roidict1[3] = slice(550, 650)  # stability test
 roidict2 = dict()
 roidict2[6] = slice(630, 730)
 for i in range(1, 200):
 	roidict1[i] = roidict1[6]
 	roidict2[i] = roidict2[6]
+roidict1[11] = slice(330, 430)
+roidict2[11] = slice(470, 570)
+for i in range(11, 200):
+	roidict1[i] = roidict1[11]
+	roidict2[i] = roidict2[11]
+roidict1[32] = slice(470, 570) 
+roidict2[32] = slice(620, 720)
+for i in range(32, 200):
+	roidict1[i] = roidict1[32]
+	roidict2[i] = roidict2[32]
+
 
 def opal_roi1(detobj, thisEvent):
 	return _opal_roi(detobj, thisEvent, roidict1)
